@@ -1,0 +1,19 @@
+/vendor/
+composer.lock
+
+/storage/logs/
+/storage/cache/
+/php_errors.log
+
+/public/uploads/
+
+# Environment configurations
+/config/environment/*.php
+.env
+
+# IDE and system files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.bak

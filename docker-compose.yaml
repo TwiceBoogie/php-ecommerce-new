@@ -1,0 +1,10 @@
+services:
+  db:
+    container_name: mysql-ecommerce
+    image: mysql:latest
+    env_file:
+      - .env
+    volumes:
+      - ./php_project.sql:/docker-entrypoint-initdb.d/php_project.sql
+    ports:
+      - "3306:3306"
