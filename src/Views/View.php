@@ -2,8 +2,10 @@
 
 namespace Sebastian\PhpEcommerce\Views;
 
-class View {
-    public static function render($view, $data = []) {
+class View
+{
+    public static function render($view, $data = []): bool|string
+    {
         $viewPath = __DIR__ . "/../Views/" . str_replace('.', '/', $view) . ".php";
 
         if (!file_exists($viewPath)) {

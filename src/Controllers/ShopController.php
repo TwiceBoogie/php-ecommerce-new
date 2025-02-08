@@ -2,9 +2,9 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
-use Sebastian\PhpEcommerce\Services\SecureSession;
+use Sebastian\PhpEcommerce\Http\Request;
 use Sebastian\PhpEcommerce\Services\ShopService;
-use function Sebastian\PhpEcommerce\Helpers\app;
+use Sebastian\PhpEcommerce\Views\Models\ShopViewModel;
 use Sebastian\PhpEcommerce\Views\View;
 
 class ShopController
@@ -17,25 +17,27 @@ class ShopController
         $this->shopService = $shopService;
     }
 
-    public function index()
+    public function index(Request $request): bool|string
     {
-        $isAdmin = SecureSession::get('user_id') !== null && app('user')->isAdmin();
+        $isAdmin = $request->isAdmin;
         $products = $this->shopService->getAllProduct();
 
+        $shopViewModel = new ShopViewModel($isAdmin, $products);
+
         return View::render('shop.index', [
-            'products' => $products,
-            'isAdmin' => $isAdmin,
+            'shop' => $shopViewModel
         ]);
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id): bool|string
     {
-        $isAdmin = SecureSession::get('user_id') !== null && app('user')->isAdmin();
+        $isAdmin = $request->isAdmin;
         $product = $this->shopService->getProduct($id);
 
+        $shopViewModel = new ShopViewModel($isAdmin, [], $product);
+
         return View::render('shop.single', [
-            'product' => $product,
-            'isAdmin' => $isAdmin,
+            'shop' => $shopViewModel
         ]);
     }
 }

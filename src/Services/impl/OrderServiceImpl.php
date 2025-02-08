@@ -2,6 +2,7 @@
 
 namespace Sebastian\PhpEcommerce\Services\Impl;
 
+use Sebastian\PhpEcommerce\DTO\ResponseDTO;
 use Sebastian\PhpEcommerce\Mapper\OrderMapper;
 use Sebastian\PhpEcommerce\Repository\OrderRepository;
 use Sebastian\PhpEcommerce\Services\OrderService;
@@ -18,10 +19,15 @@ class OrderServiceImpl implements OrderService
         $this->orderMapper = $orderMapper;
     }
 
-    public function getOrders(): array
+    public function getOrders(): ResponseDTO
     {
         $userId = SecureSession::get('user_id');
         $orders = $this->orderRepository->getOrders($userId);
-        return $this->orderMapper->mapToOrderDTOArray($orders);
+        $ordersDto = $this->orderMapper->mapToOrderDTOArray($orders);
+        return new ResponseDTO(
+            "success",
+            "orders fetch successfully",
+            $ordersDto
+        );
     }
 }

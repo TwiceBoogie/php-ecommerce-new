@@ -2,8 +2,9 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
+use Sebastian\PhpEcommerce\Http\Request;
+use Sebastian\PhpEcommerce\Http\Requests\LoginRequest;
 use Sebastian\PhpEcommerce\Services\LoginService;
-use Sebastian\PhpEcommerce\Services\SecureSession;
 use Sebastian\PhpEcommerce\Views\View;
 use Sebastian\PhpEcommerce\Services\Response;
 
@@ -16,24 +17,20 @@ class LoginController
         $this->loginService = $loginService;
     }
 
-    public function index()
+    public function index(Request $request): bool|string
     {
         return View::render('login.index');
     }
 
-    public function login()
+    public function login(Request $request)
     {
-        $input = json_decode(file_get_contents('php://input'), true);
+        $loginRequest = new LoginRequest($request->getBody());
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return Response::send(['error' => 'Invalid JSON input'], 400);
-        }
-
-        $response = $this->loginService->login($input);
+        $response = $this->loginService->login($loginRequest);
         return Response::send($response->toArray(), $response->getStatusCode());
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         $response = $this->loginService->logout();
         return Response::send($response->toArray(), $response->getStatusCode());

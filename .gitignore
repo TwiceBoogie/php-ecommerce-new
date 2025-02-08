@@ -6,6 +6,7 @@ composer.lock
 /php_errors.log
 
 /public/uploads/
+/routes/
 
 # Environment configurations
 /config/environment/*.php

@@ -53,7 +53,17 @@ $isAdmin = isset($isAdmin) && $isAdmin;
                     <?php endif; ?>
                     <li class="nav-item d-flex">
                         <a class="nav-link me-3" href="/cart"><i class="fas fa-shopping-bag"></i></a>
-                        <a class="nav-link" href="/account"><i class="fas fa-user"></i></a>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle fas fa-user" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/account">Account</a></li>
+                                <li><a class="dropdown-item" href="/orders">Orders</a></li>
+                                <li><a class="dropdown-item">logout</a></li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </div>

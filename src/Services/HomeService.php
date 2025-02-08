@@ -2,6 +2,8 @@
 
 namespace Sebastian\PhpEcommerce\Services;
 
+use Sebastian\PhpEcommerce\DTO\ProductDTO;
+
 interface HomeService
 {
     /**
@@ -9,7 +11,7 @@ interface HomeService
      *
      * @param string $category The category of the products (e.g., 'keyboards', 'mice').
      * @param int $limit The maximum number of products to fetch.
-     * @return array ProductDTO[] Array of ProductDTO objects.
+     * @return ProductDTO[] Array of ProductDTO objects.
      */
     public function getProductsByCategory(string $category, int $limit): array;
 }

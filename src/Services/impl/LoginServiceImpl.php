@@ -3,6 +3,7 @@
 namespace Sebastian\PhpEcommerce\Services\Impl;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
+use Sebastian\PhpEcommerce\Http\Requests\LoginRequest;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\LoginRepository;
 use Sebastian\PhpEcommerce\Repository\UserRepository;
@@ -25,23 +26,22 @@ class LoginServiceImpl implements LoginService
         $this->cartRepository = $cartRepository;
     }
 
-    public function login(array $input): ResponseDTO
+    public function login(LoginRequest $request): ResponseDTO
     {
-        $email = filter_var($input['email'] ?? '', FILTER_VALIDATE_EMAIL);
-        $password = $input['password'] ?? '';
-
-        $errors = $this->validateLoginFields($email, $password);
         // validation errors
-        if ($errors) {
+        if ($request->fails()) {
             return new ResponseDTO(
                 'error',
                 'Validation failed',
                 [],
-                $errors,
+                $request->errors(),
                 400
             );
         }
-        $user = $this->userRepository->findBy('email', $email);
+
+        $email = $request->getEmail();
+        $password = $request->getPassword();
+        $user = $this->userRepository->findUserByEmail($email);
         if (count($user) !== 1) {
             return $this->handleInvalidLogin($email);
         }
@@ -103,23 +103,6 @@ class LoginServiceImpl implements LoginService
             ['email' => '', 'password' => 'Invalid email or password'],
             401
         );
-    }
-
-    private function validateLoginFields($email, $password)
-    {
-        $errors = [];
-
-        if (!$email) {
-            $errors['email'] = 'Email Required';
-        }
-
-        if (empty($password)) {
-            $errors['password'] = 'Password is required';
-        } elseif (strlen($password) < 8) {
-            $errors['password'] = 'Password must be at least 8 characters';
-        }
-
-        return $errors;
     }
 
     private function hashPassword(string $password): string

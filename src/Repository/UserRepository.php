@@ -12,6 +12,14 @@ class UserRepository extends BaseRepository
         parent::__construct($db, 'users');
     }
 
+    public function findUserByEmail(string $email): array
+    {
+        return $this->db->select(
+            "SELECT * FROM `users` WHERE user_email = :email",
+            ["email" => $email]
+        );
+    }
+
     public function getUserIdByCreds(string $email, string $password): array
     {
         return $this->db->select(
@@ -36,4 +44,28 @@ class UserRepository extends BaseRepository
             'user_id' => $userId,
         ]);
     }
+
+    public function getUserDetails(int $userId): array
+    {
+        $result = $this->db->select(
+            "SELECT u.user_email AS email, u.user_name AS name, u.register_date, ud.id, ud.phone, ud.address, ud.city, ud.state, ud.postal_code, ud.country
+            FROM `users` u
+            LEFT JOIN `user_details` ud ON u.id = ud.user_id
+            WHERE u.id = :userId",
+            ["userId" => $userId]
+        );
+
+        return $result[0];
+    }
+
+    public function isAdmin(int $userId): bool
+    {
+        $result = $this->db->select(
+            "SELECT COUNT(*) AS count FROM `users` WHERE `id` = :userId AND `user_role` = 1",
+            ['userId' => $userId]
+        );
+
+        return !empty($result) && $result[0]['count'] > 0;
+    }
+
 }

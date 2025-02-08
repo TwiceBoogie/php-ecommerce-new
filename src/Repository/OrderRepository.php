@@ -12,13 +12,13 @@ class OrderRepository extends BaseRepository
         parent::__construct($db, 'orders');
     }
 
-    public function getOrders(int $userId): ?array
+    public function getOrders(int $userId): array
     {
         $result = $this->db->select(
             "SELECT * FROM `orders` WHERE `user_id` = :userId",
             ["userId" => $userId]
         );
 
-        return $result[0] ?? null;
+        return $result[0] ?? [];
     }
 }

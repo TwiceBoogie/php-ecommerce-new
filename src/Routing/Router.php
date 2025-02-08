@@ -2,16 +2,20 @@
 
 namespace Sebastian\PhpEcommerce\Routing;
 
+use Sebastian\PhpEcommerce\Controllers\AccountController;
 use Sebastian\PhpEcommerce\Controllers\ContactController;
 use Sebastian\PhpEcommerce\Controllers\LoginController;
+use Sebastian\PhpEcommerce\Controllers\OrderController;
 use Sebastian\PhpEcommerce\Controllers\RegisterController;
 use Sebastian\PhpEcommerce\Middleware\AuthMiddleware;
+use Sebastian\PhpEcommerce\Middleware\IsAdminMiddleware;
 use Sebastian\PhpEcommerce\Middleware\RedirectIfAuthMiddleware;
 use Sebastian\PhpEcommerce\Services\Response;
 use Sebastian\PhpEcommerce\Controllers\HomeController;
 use Sebastian\PhpEcommerce\Controllers\ShopController;
 use Sebastian\PhpEcommerce\Controllers\CartController;
 use Sebastian\PhpEcommerce\Views\View;
+use Sebastian\PhpEcommerce\Http\Request;
 
 class Router
 {
@@ -48,12 +52,13 @@ class Router
     public function generateRouteCache(): void
     {
         // Dynamically scan controllers and collect routes
-        $this->register('/', HomeController::class, 'index');
-        $this->register('/products', ShopController::class, 'index');
-        $this->register('/product/{id}', ShopController::class, 'show', ['GET']);
+        $this->register('/', HomeController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
+        $this->register('/products', ShopController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
+        $this->register('/product/{id}', ShopController::class, 'show', ['GET'], [IsAdminMiddleware::class]);
         $this->register('/contact', ContactController::class, 'index', ['GET'], [AuthMiddleware::class]);
         $this->register('/login', LoginController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/register', RegisterController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
+        $this->register('/account', AccountController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
 
         $this->register('/api/v1/cart', CartController::class, 'index', ['GET']);
         $this->register('/api/v1/cart/add', CartController::class, 'add', ['POST']);
@@ -61,6 +66,7 @@ class Router
         $this->register('/api/v1/auth/logout', LoginController::class, 'logout', ['GET']);
         $this->register('/api/v1/auth/login', LoginController::class, 'login', ['POST'], [RedirectIfAuthMiddleware::class]);
         $this->register('/api/v1/auth/register', RegisterController::class, 'register', ['POST'], [RedirectIfAuthMiddleware::class]);
+        $this->register('/api/v1/orders', OrderController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
 
         file_put_contents(
             __DIR__ . '/../../storage/cache/routes.php',
@@ -92,7 +98,11 @@ class Router
 
                 // Execute middleware before calling the controller
                 $this->runMiddlewares($route['middlewares'], function () use ($controller, $action, $matches) {
-                    $response = $controller->$action(...$matches);
+                    // Create a proper Request object
+                    $request = new Request();
+
+                    // Pass $request to the controller
+                    $response = $controller->$action($request, ...array_values($matches));
 
                     if (is_string($response)) {
                         echo $response;
@@ -129,12 +139,17 @@ class Router
 
         $middlewareChain = array_reduce($stack, function ($next, $middleware) {
             return function ($request) use ($middleware, $next) {
-                $middlewareInstance = new $middleware();
+                if (!$request instanceof Request) {
+                    $request = new Request(); // ✅ Ensure it's always a Request object
+                }
+
+                $middlewareInstance = $this->container[$middleware] ?? new $middleware();
                 return $middlewareInstance->handle($request, $next);
             };
-        }, $next);
+        }, function ($request) use ($next) {
+            return $next($request);
+        });
 
-        return $middlewareChain([]);
+        return $middlewareChain(new Request()); // ✅ Ensure it starts with a Request object
     }
-
 }

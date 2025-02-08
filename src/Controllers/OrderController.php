@@ -2,10 +2,9 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
+use Sebastian\PhpEcommerce\Http\Request;
 use Sebastian\PhpEcommerce\Services\OrderService;
-use Sebastian\PhpEcommerce\Services\SecureSession;
-use function Sebastian\PhpEcommerce\Helpers\app;
-use Sebastian\PhpEcommerce\Views\View;
+use Sebastian\PhpEcommerce\Services\Response;
 
 class OrderController
 {
@@ -16,9 +15,11 @@ class OrderController
         $this->orderService = $orderService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $isAdmin = SecureSession::get('user_id') !== null && app('user')->isAdmin();
-        $order = $this->orderService->getOrders();
+        $isAdmin = $request->isAdmin;
+        $response = $this->orderService->getOrders();
+
+        return Response::send($response->toArray(), $response->getStatusCode());
     }
 }

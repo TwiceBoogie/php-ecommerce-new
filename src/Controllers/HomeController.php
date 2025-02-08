@@ -2,9 +2,9 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
+use Sebastian\PhpEcommerce\Http\Request;
 use Sebastian\PhpEcommerce\Services\HomeService;
-use Sebastian\PhpEcommerce\Services\SecureSession;
-use function Sebastian\PhpEcommerce\Helpers\app;
+use Sebastian\PhpEcommerce\Views\Models\HomeViewModel;
 use Sebastian\PhpEcommerce\Views\View;
 
 class HomeController
@@ -17,19 +17,16 @@ class HomeController
         $this->homeService = $homeService;
     }
 
-    /**
-     * @Route("/", methods={"GET"})
-     */
-    public function index()
+    public function index(Request $request): bool|string
     {
-        $isAdmin = SecureSession::get('user_id') !== null && app('user')->isAdmin();
+        $isAdmin = $request->isAdmin;
         $keyboards = $this->homeService->getProductsByCategory('keyboards', 4);
         $mice = $this->homeService->getProductsByCategory('mice', 4);
 
+        $homeViewModel = new HomeViewModel($isAdmin, $mice, $keyboards);
+
         return View::render('home.index', [
-            'keyboards' => $keyboards,
-            'mice' => $mice,
-            'isAdmin' => $isAdmin,
+            'home' => $homeViewModel
         ]);
     }
 }

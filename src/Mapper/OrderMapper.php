@@ -12,6 +12,11 @@ class OrderMapper extends BaseMapper
         return $this->mapArrayToDTO($order, OrderDTO::class);
     }
 
+    /**
+     * Map orders data from db to a OrderDTO
+     * @param array $orders
+     * @return OrderDTO[]
+     */
     public function mapToOrderDTOArray(array $orders): array
     {
         return $this->mapArrayToDTOArray($orders, OrderDTO::class);

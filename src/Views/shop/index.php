@@ -1,7 +1,11 @@
 <?php
 
-use function Sebastian\PhpEcommerce\Helpers\include_partial;
+/**
+ * @var \Sebastian\PhpEcommerce\Views\Models\ShopViewModel $shop
+ */
 
+use function Sebastian\PhpEcommerce\Helpers\include_partial;
+$isAdmin = $shop->isAdmin();
 include_partial('header.php');
 ?>
 
@@ -15,7 +19,7 @@ include_partial('header.php');
     <div class="row mx-auto container">
 
 
-        <?php foreach ($products as $product): ?>
+        <?php foreach ($shop->getProducts() as $product): ?>
 
             <div onclick="window.location.href='/product/<?= $product->getId(); ?>';"
                 class="product text-center col-lg-3 col-md-4 col-sm-12">

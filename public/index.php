@@ -4,7 +4,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Bootstrap the application
-$config = require __DIR__ . '/../bootstrap/app.php';
+$config = require_once __DIR__ . '/../bootstrap/app.php';
 
 // Load routes
 require_once __DIR__ . '/../src/Helpers/HelperFunctions.php';

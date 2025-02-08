@@ -70,6 +70,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js"
     integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/additional-methods.min.js"
+    integrity="sha512-owaCKNpctt4R4oShUTTraMPFKQWG9UdWTtG6GRzBjFV4VypcFi6+M3yc4Jk85s3ioQmkYWJbUl1b2b2r41RTjA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script src="/assets/js/setup.js"></script>
 <script src="/assets/js/common.js"></script>
 <script src="/assets/js/http.js"></script>
@@ -78,6 +82,8 @@
 <script src="/assets/js/checkout.js"></script>
 <script src="/assets/js/cart.js"></script>
 <script src="/assets/js/login.js"></script>
+<script src="/assets/js/orders.js"></script>
+<script src="/assets/js/userSettings.js"></script>
 
 </body>
 
