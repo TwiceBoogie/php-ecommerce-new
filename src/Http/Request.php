@@ -13,32 +13,42 @@ class Request
 
     public function __construct()
     {
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $this->query = $_GET;
+        $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $this->path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        $this->query = $_GET ?? [];
         $this->body = $this->parseRequestBody();
     }
 
     /**
-     * Parses request body depending on content type.
+     * Parses the request body based on the Content-Type header.
+     *
+     * If the request has a Content-Type of "application/json", it decodes the JSON data.
+     * Otherwise, it falls back to $_POST.
+     *
+     * @return array The parsed request body data.
      */
     private function parseRequestBody(): array
     {
-        if ($this->method === 'POST') {
-            return $_POST;
-        }
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
-        if (in_array($this->method, ['PUT', 'PATCH', 'DELETE', 'POST'])) {
+        // If the request content type is JSON, decode it
+        if (stripos($contentType, 'application/json') !== false) {
             $input = file_get_contents('php://input');
-            $decoded = json_decode($input, true);
-            return json_last_error() === JSON_ERROR_NONE ? $decoded : [];
+            $data = json_decode($input, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($data)) {
+                return $data;
+            }
+            return [];
         }
 
-        return [];
+        // For form data or other content types, fallback to $_POST
+        return $_POST;
     }
 
     /**
      * Get all request body data.
+     *
+     * @return array
      */
     public function getBody(): array
     {
@@ -46,7 +56,11 @@ class Request
     }
 
     /**
-     * Get a specific parameter from the request body.
+     * Get a specific parameter from the request body or query parameters.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
      */
     public function get(string $key, $default = null)
     {
@@ -54,7 +68,9 @@ class Request
     }
 
     /**
-     * Get query parameters ($_GET)
+     * Get query parameters ($_GET).
+     *
+     * @return array
      */
     public function getQuery(): array
     {
@@ -62,7 +78,9 @@ class Request
     }
 
     /**
-     * Get HTTP method (GET, POST, etc.)
+     * Get HTTP method (GET, POST, etc.).
+     *
+     * @return string
      */
     public function getMethod(): string
     {
@@ -70,11 +88,12 @@ class Request
     }
 
     /**
-     * Get request path (/users, /login, etc.)
+     * Get request path (e.g., /users, /login, etc.).
+     *
+     * @return string
      */
     public function getPath(): string
     {
         return $this->path;
     }
-
 }

@@ -2,6 +2,8 @@
 
 namespace Sebastian\PhpEcommerce\Services;
 
+use Sebastian\PhpEcommerce\DTO\ResponseDTO;
+
 class Response
 {
     protected $statuses = array(

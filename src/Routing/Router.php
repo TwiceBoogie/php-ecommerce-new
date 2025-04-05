@@ -58,7 +58,7 @@ class Router
         $this->register('/contact', ContactController::class, 'index', ['GET'], [AuthMiddleware::class]);
         $this->register('/login', LoginController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/register', RegisterController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
-        $this->register('/account', AccountController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
+        $this->register('/account', AccountController::class, 'index', ['GET'], [AuthMiddleware::class, IsAdminMiddleware::class]);
 
         $this->register('/api/v1/cart', CartController::class, 'index', ['GET']);
         $this->register('/api/v1/cart/add', CartController::class, 'add', ['POST']);
@@ -67,6 +67,7 @@ class Router
         $this->register('/api/v1/auth/login', LoginController::class, 'login', ['POST'], [RedirectIfAuthMiddleware::class]);
         $this->register('/api/v1/auth/register', RegisterController::class, 'register', ['POST'], [RedirectIfAuthMiddleware::class]);
         $this->register('/api/v1/orders', OrderController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
+        $this->register('/api/v1/user/settings', AccountController::class, 'updateUserDetails', ['POST'], [AuthMiddleware::class]);
 
         file_put_contents(
             __DIR__ . '/../../storage/cache/routes.php',

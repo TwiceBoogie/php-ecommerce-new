@@ -68,4 +68,37 @@ class UserRepository extends BaseRepository
         return !empty($result) && $result[0]['count'] > 0;
     }
 
+    public function updateUserDetails(
+        int $userId,
+        string $name,
+        string $phone,
+        string $address,
+        string $city,
+        string $state,
+        string $postal,
+        string $country
+    ) {
+        $this->transactional(function () use ($userId, $name, $phone, $address, $city, $state, $postal, $country) {
+            $this->db->update(
+                'users',
+                ['user_name' => $name],
+                'id = :userId',
+                ['userId' => $userId]
+            );
+            $this->db->update(
+                'user_details',
+                [
+                    'phone' => $phone,
+                    'address' => $address,
+                    'city' => $city,
+                    'state' => $state,
+                    'postal_code' => $postal,
+                    'country' => $country
+                ],
+                'user_id = :userId',
+                ['userId' => $userId]
+            );
+        });
+    }
+
 }

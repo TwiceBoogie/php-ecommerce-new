@@ -1,3 +1,7 @@
+import $ from "jquery";
+import Util from "./utils.js";
+import Http from "./http.js";
+
 const Orders = {
   /**
    * Initialize the Orders module.
@@ -77,7 +81,4 @@ const Orders = {
   },
 };
 
-// Initialize Orders module when the page loads
-$(function () {
-  Orders.init();
-});
+export default Orders;

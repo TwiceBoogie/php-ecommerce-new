@@ -1,3 +1,7 @@
+import $ from "jquery";
+import Util from "./utils.js";
+import Http from "./http.js";
+
 const Login = {
   /**
    * Initialize the login module.
@@ -42,20 +46,21 @@ const Login = {
    * @param {HTMLFormElement} form
    */
   submit: async function (form) {
+    Util.removeErrorMessages();
     try {
       const formData = this.getLoginFormData(form);
-      const response = await HelpModules.Http.post(
-        "/api/v1/auth/login",
-        formData
-      );
+      const response = await Http.post("/api/v1/auth/login", formData);
 
       // Redirect on success
       window.location = response.page;
     } catch (error) {
       console.error("Login Error:", error);
+      if (error.errors) {
+        Util.showFormErrors(form, error.errors);
+      }
 
       // Show error toast
-      HelpModules.Util.displayErrorMessage(
+      Util.displayErrorMessage(
         "Login Failed",
         error.message || "Invalid email or password. Please try again."
       );
@@ -70,12 +75,9 @@ const Login = {
   getLoginFormData: function (form) {
     return {
       email: form["email"].value,
-      password: HelpModules.Util.hash(form["password"].value),
+      password: form["password"].value,
     };
   },
 };
 
-// Initialize login module when the page loads
-$(function () {
-  Login.init();
-});
+export default Login;

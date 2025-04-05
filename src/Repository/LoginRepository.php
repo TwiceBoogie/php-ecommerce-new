@@ -29,9 +29,9 @@ class LoginRepository extends BaseRepository
             FROM `login_attempts`
             WHERE `email` = :email
             AND
-            WHERE `success` = 0
+            `success` = 0
             AND
-            WHERE `attempt_time` > NOW() - INTERVAL 15 MINUTE",
+            `attempt_time` > NOW() - INTERVAL 15 MINUTE",
             ['email' => $email]
         );
         if (count($attempts) >= 5) {

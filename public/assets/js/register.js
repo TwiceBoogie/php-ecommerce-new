@@ -1,3 +1,8 @@
+import $ from "jquery";
+import "jquery-validation";
+import Util from "./utils.js";
+import Http from "./http.js";
+
 const Register = {
   /**
    * Initialize the register module.
@@ -57,12 +62,9 @@ const Register = {
    */
   submit: async function (form) {
     try {
-      HelpModules.Util.removeErrorMessages();
+      Util.removeErrorMessages();
       const formData = this.getRegisterFormData(form);
-      const response = await HelpModules.Http.post(
-        "/api/v1/auth/register",
-        formData
-      );
+      const response = await Http.post("/api/v1/auth/register", formData);
 
       // Redirect on success
       setTimeout(() => {
@@ -72,11 +74,11 @@ const Register = {
       console.error("Registration Error:", error);
 
       // Show error toast
-      HelpModules.Util.displayErrorMessage(
+      Util.displayErrorMessage(
         "Registration Failed",
         error.message || "An error occurred. Please try again."
       );
-      HelpModules.Util.showFormErrors(form, error);
+      Util.showFormErrors(form, error);
     }
   },
 
@@ -90,12 +92,9 @@ const Register = {
       name: form["name"].value,
       email: form["email"].value,
       password: HelpModules.Util.hash(form["password"].value),
-      confirmPassword: HelpModules.Util.hash(form["confirmPassword"].value),
+      confirmPassword: Util.hash(form["confirmPassword"].value),
     };
   },
 };
 
-// Initialize register module when the page loads
-$(function () {
-  Register.init();
-});
+export default Register;

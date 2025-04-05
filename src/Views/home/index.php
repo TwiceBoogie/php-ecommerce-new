@@ -16,7 +16,7 @@ include_partial('header.php');
             <h5>Don't Just Grow...</h5>
             <h1><span>Evolve</span> Stay Ahead of the Competition!</h1>
             <p>Check out quaity products at the most affordable prices!</p>
-            <a href="/products"><button>Shop Now</button></a>
+            <a href="/products"><button class="btn-main">Shop Now</button></a>
         </div>
     </section>
 
@@ -29,7 +29,7 @@ include_partial('header.php');
                 <img class="img-fluid" src="/assets/imgs/one.jpg" />
                 <div class="details">
                     <h2>Keyboards</h2>
-                    <a href="/products"><button class="text-uppercase">Show Now</button></a>
+                    <a href="/products"><button class="text-uppercase btn-main">Show Now</button></a>
                 </div>
             </div>
             <!--Two-->
@@ -37,7 +37,7 @@ include_partial('header.php');
                 <img class="img-fluid" src="/assets/imgs/two.jpg" />
                 <div class="details">
                     <h2>Mice</h2>
-                    <a href="/products"><button class="text-uppercase">Show Now</button></a>
+                    <a href="/products"><button class="text-uppercase btn-main">Show Now</button></a>
                 </div>
             </div>
 
@@ -46,7 +46,7 @@ include_partial('header.php');
                 <img class="img-fluid" src="/assets/imgs/three.jpg" />
                 <div class="details">
                     <h2>Much More!</h2>
-                    <a href="/products"><button class="text-uppercase">Show Now</button></a>
+                    <a href="/products"><button class="text-uppercase btn-main">Show Now</button></a>
                 </div>
             </div>
         </div>
@@ -86,7 +86,7 @@ include_partial('header.php');
         <div class="container">
             <h4>Good things are coming!</h4>
             <h1><br></h1>
-            <a href="/products"><button class="text-uppercase">Shop Now</button></a>
+            <a href="/products"><button class="text-uppercase btn-main">Shop Now</button></a>
         </div>
     </section>
 
@@ -112,7 +112,7 @@ include_partial('header.php');
                     </div>
                     <h5 class="p-name"><?= $mouse->getName(); ?></h5>
                     <h4 class="p-price">$<?= $mouse->getPrice(); ?></h4>
-                    <a href="/product/<?= $mouse->getId(); ?>"><button class="buy-btn">Buy
+                    <a href="/product/<?= $mouse->getId(); ?>"><button class="buy-btn btn-main">Buy
                             Now</button></a>
                 </div>
             <?php endforeach; ?>

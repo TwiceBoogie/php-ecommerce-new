@@ -1,4 +1,42 @@
+import $ from "jquery";
+import Util from "./utils.js";
+import Http from "./http.js";
+
 const Cart = {
+  /**
+   * Initializes the cart by attaching event listeners.
+   */
+  init: function () {
+    this.attachEventListeners();
+  },
+
+  /**
+   * Attach event listener to all "Add to Cart" buttons.
+   */
+  attachEventListeners: function () {
+    $(".add-to-cart-btn").on("click", async function (event) {
+      event.preventDefault();
+
+      const button = $(this);
+
+      // Get product ID from button data attribute
+      const productId = button.data("product-id");
+
+      // Find the corresponding quantity input field
+      const quantityInput = $(
+        `.product-quantity[data-product-id="${productId}"]`
+      );
+
+      // Get the quantity or default to 1
+      const quantity =
+        quantityInput.length && quantityInput.val()
+          ? parseInt(quantityInput.val(), 10)
+          : 1;
+
+      // Call Cart.addToCart with product ID and quantity
+      await Cart.addToCart(productId, quantity);
+    });
+  },
   /**
    * Add an item to the cart.
    * @param {number} productId - The ID of the product to add to the cart.
@@ -6,7 +44,7 @@ const Cart = {
    */
   addToCart: async function (productId, quantity) {
     try {
-      const response = await HelpModules.Http.post("/api/v1/cart/add", {
+      const response = await Http.post("/api/v1/cart/add", {
         product_id: productId,
         quantity: quantity,
       });
@@ -26,7 +64,7 @@ const Cart = {
       console.error("Error adding to cart:", error);
 
       // Show error message in a modal
-      HelpModules.Util.displayErrorMessage(
+      Util.displayErrorMessage(
         "Error Adding to Cart",
         error.message || "Failed to add the item to the cart. Please try again."
       );
@@ -42,30 +80,4 @@ const Cart = {
   },
 };
 
-$(function () {
-  /**
-   * Attach event listener to all "Add to Cart" buttons.
-   */
-  $(".add-to-cart-btn").on("click", async function (event) {
-    event.preventDefault();
-
-    const button = $(this);
-
-    // Get product ID from button data attribute
-    const productId = button.data("product-id");
-
-    // Find the corresponding quantity input field
-    const quantityInput = $(
-      `.product-quantity[data-product-id="${productId}"]`
-    );
-
-    // Get the quantity or default to 1
-    const quantity =
-      quantityInput.length && quantityInput.val()
-        ? parseInt(quantityInput.val(), 10)
-        : 1;
-
-    // Call Cart.addToCart with product ID and quantity
-    await Cart.addToCart(productId, quantity);
-  });
-});
+export default Cart;

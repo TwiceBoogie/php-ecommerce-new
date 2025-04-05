@@ -1,8 +1,6 @@
 <?php
 
-namespace Sebastian\PhpEcommerce\Http\Requests;
-
-use Sebastian\PhpEcommerce\Services\Response;
+namespace Sebastian\PhpEcommerce\Http\Request;
 
 class LoginRequest
 {

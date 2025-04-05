@@ -3,7 +3,7 @@
 namespace Sebastian\PhpEcommerce\Services;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
-use Sebastian\PhpEcommerce\Http\Requests\LoginRequest;
+use Sebastian\PhpEcommerce\Http\Request\LoginRequest;
 
 interface LoginService
 {

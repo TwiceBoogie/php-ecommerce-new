@@ -3,7 +3,7 @@
 namespace Sebastian\PhpEcommerce\Controllers;
 
 use Sebastian\PhpEcommerce\Http\Request;
-use Sebastian\PhpEcommerce\Http\Requests\LoginRequest;
+use Sebastian\PhpEcommerce\Http\Request\LoginRequest;
 use Sebastian\PhpEcommerce\Services\LoginService;
 use Sebastian\PhpEcommerce\Views\View;
 use Sebastian\PhpEcommerce\Services\Response;

@@ -1,3 +1,7 @@
+import $ from "jquery";
+import Util from "./utils.js";
+import Http from "./http.js";
+
 const UserSettings = {
   init: function () {
     this.attachEventListeners();
@@ -8,10 +12,6 @@ const UserSettings = {
       rules: {
         name: {
           required: true,
-        },
-        email: {
-          required: true,
-          email: true,
         },
         phone: {
           phoneUS: true,
@@ -33,10 +33,6 @@ const UserSettings = {
         name: {
           required: "Name is required",
           minlength: "Name must be at least 3 characters long",
-        },
-        email: {
-          required: "Email is required",
-          email: "Please enter a valid email address",
         },
         phone: {
           phoneUS: "Please enter a valid US phone number",
@@ -66,19 +62,21 @@ const UserSettings = {
   },
   submit: async function (form) {
     try {
-      console.log(form);
+      Util.removeErrorMessages();
+      const formData = this.getUserSettingsFormData(form);
+      const res = await Http.post("/api/v1/user/settings", formData);
+      console.log("hello", res);
     } catch (error) {}
   },
 
   /**
    * Extract register form data.
    * @param {HTMLFormElement} form
-   * @returns {{name: string, email: string, phone: string, address: string, city: string, state: string, postal: digits, country: string}}
+   * @returns {{name: string, phone: string, address: string, city: string, state: string, postal: digits, country: string}}
    */
   getUserSettingsFormData: function (form) {
     return {
       name: form["name"].value,
-      email: form["email"].value,
       phone: form["phone"].value,
       address: form["address"].value,
       city: form["city"].value,
@@ -89,6 +87,4 @@ const UserSettings = {
   },
 };
 
-$(function () {
-  UserSettings.init();
-});
+export default UserSettings;

@@ -2,7 +2,7 @@
 
 namespace Sebastian\PhpEcommerce\DTO;
 
-class UserDetailsDTO
+class UserDetailsDTO implements \JsonSerializable
 {
     private int $id;
     private string $email;
@@ -87,5 +87,21 @@ class UserDetailsDTO
     public function registerDate(): string
     {
         return $this->register_date;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'name' => $this->name,
+            'register_date' => $this->register_date,
+            'phone' => $this->phone,
+            'address' => $this->address,
+            'city' => $this->city,
+            'state' => $this->state,
+            'postal_code' => $this->postal_code,
+            'country' => $this->country,
+        ];
     }
 }

@@ -3,7 +3,7 @@
 namespace Sebastian\PhpEcommerce\Services\Impl;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
-use Sebastian\PhpEcommerce\Http\Requests\LoginRequest;
+use Sebastian\PhpEcommerce\Http\Request\LoginRequest;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\LoginRepository;
 use Sebastian\PhpEcommerce\Repository\UserRepository;

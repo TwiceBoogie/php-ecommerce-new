@@ -23,11 +23,47 @@ include_partial('header.php');
                                     class="rounded-circle p-1 bg-primary" width="110">
                                 <div class="mt-3">
                                     <h4><?= $account->getName(); ?></h4>
-                                    <p class="text-secondary mb-1">Registerd:
+                                    <p class="text-secondary mb-1">Registered:
                                         <span><?= $account->getRegisterDate(); ?></span>
                                     </p>
-                                    <!-- <button class="btn btn-primary">Follow</button>
-                                    <button class="btn btn-outline-primary">Message</button> -->
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-secondary mb-1">Email:
+                                        <span><?= $account->getEmail(); ?></span>
+                                    </p>
+                                    <!-- <button class="btn btn-primary">Follow</button> -->
+                                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#emailModal">
+                                        Change Email
+                                    </button>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="emailModal" tabindex="-1"
+                                        aria-labelledby="emailModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="emailModalLabel">Change your email
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form id="emailChange-form">
+                                                        <div class="mb-3 form-group">
+                                                            <input type="email" class="form-control form-control-lg"
+                                                                name="email" placeholder="Enter new email">
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-primary">Save changes</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -44,15 +80,6 @@ include_partial('header.php');
                                 <div class="col-sm-9 text-secondary">
                                     <input type="text" class="form-control" name="name"
                                         value="<?= $account->getName(); ?>">
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-3">
-                                    <h6 class="mb-0">Email</h6>
-                                </div>
-                                <div class="col-sm-9 text-secondary">
-                                    <input type="text" class="form-control" name="email"
-                                        value="<?= $account->getEmail(); ?>">
                                 </div>
                             </div>
                             <div class="row mb-3">

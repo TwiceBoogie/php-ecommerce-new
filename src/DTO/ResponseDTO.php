@@ -25,19 +25,18 @@ class ResponseDTO
         $this->statusCode = $statusCode;
     }
 
-    // Convert to array for API responses
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
     public function toArray(): array
     {
         return [
             'status' => $this->status,
             'message' => $this->message,
             'data' => $this->data,
-            'errors' => $this->errors
+            'errors' => $this->errors,
         ];
-    }
-
-    public function getStatusCode(): int
-    {
-        return $this->statusCode;
     }
 }

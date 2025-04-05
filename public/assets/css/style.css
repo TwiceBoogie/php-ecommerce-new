@@ -51,7 +51,7 @@ h6 {
   color: #d8d8d8;
 }
 
-button {
+.btn-main {
   font-size: 0.8rem;
   font-weight: 900;
   outline: none;
@@ -65,7 +65,7 @@ button {
   border-radius: 10px;
 }
 
-button:hover {
+.btn-main:hover {
   background-color: green;
 }
 

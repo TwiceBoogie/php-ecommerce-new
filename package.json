@@ -1,0 +1,37 @@
+{
+  "name": "php-ecommerce",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "watch": "webpack --watch --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TwiceBoogie/php-ecommerce-new.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/TwiceBoogie/php-ecommerce-new/issues"
+  },
+  "homepage": "https://github.com/TwiceBoogie/php-ecommerce-new#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.26.8",
+    "babel-loader": "^9.2.1",
+    "clean-webpack-plugin": "^4.0.0",
+    "path": "^0.12.7",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "jquery-validation": "^1.21.0"
+  }
+}
