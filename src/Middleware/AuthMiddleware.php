@@ -9,7 +9,7 @@ class AuthMiddleware implements MiddlewareInterface
 {
     public function handle(Request $request, callable $next): mixed
     {
-        if (!SecureSession::get('user_id')) {
+        if (!$request->isAuthenticated()) {
             // Redirect to login if the user is not logged in
             header("Location: /login");
             exit();

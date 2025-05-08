@@ -3,14 +3,13 @@
 namespace Sebastian\PhpEcommerce\Middleware;
 
 use Sebastian\PhpEcommerce\Http\Request;
-use Sebastian\PhpEcommerce\Services\SecureSession;
 use Sebastian\PhpEcommerce\Services\Response;
 
 class RedirectIfAuthMiddleware implements MiddlewareInterface
 {
     public function handle(Request $request, callable $next): mixed
     {
-        if (SecureSession::get('user_id')) {
+        if ($request->isAuthenticated()) {
             if ($this->isApiRequest($request)) {
                 // Return JSON response instead of redirecting
                 Response::send(['error' => 'Already authenticated'], 403);
