@@ -3,6 +3,7 @@
 namespace Sebastian\PhpEcommerce\Services\Impl;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
+use Sebastian\PhpEcommerce\Http\Request\RegisterRequest;
 use Sebastian\PhpEcommerce\Services\RegisterService;
 use Sebastian\PhpEcommerce\Repository\UserRepository;
 use Sebastian\PhpEcommerce\Services\CartService;
@@ -19,20 +20,28 @@ class RegisterServiceImpl implements RegisterService
         $this->cartService = $cartService;
     }
 
-    public function register(array $input): ResponseDTO
+    public function register(RegisterRequest $request): ResponseDTO
     {
-        $name = $input["name"] ?? '';
-        $email = filter_var($input['email'] ?? '', FILTER_VALIDATE_EMAIL);
-        $password = $input['password'] ?? '';
-        $confirmPassword = $input['confirmPassword'] ?? '';
+        $name = $request->getName();
+        $email = $request->getEmail();
+        $password = $request->getPassword();
 
-        $errors = $this->validateRegisterFields($name, $email, $password, $confirmPassword);
-        if ($errors) {
+        if ($request->fails()) {
             return new ResponseDTO(
                 'error',
                 'Validation failed',
                 [],
-                $errors,
+                $request->errors(),
+                400
+            );
+        }
+
+        if ($this->isEmailExist($email)) {
+            return new ResponseDTO(
+                "error",
+                "Validation failed",
+                [],
+                ['email' => 'Email already in use'],
                 400
             );
         }
@@ -68,41 +77,14 @@ class RegisterServiceImpl implements RegisterService
             ]);
             $userId = $user['id'];
             $this->userRepository->insertUserDetails($userId);
-            SecureSession::set('user_id', $userId);
             SecureSession::regenerate();
+            SecureSession::set('user_id', $userId);
         });
     }
 
-    private function validateRegisterFields(string $name, string $email, string $password, string $confirmPassword): array
+    private function isEmailExist(string $email): bool
     {
-        $errors = [];
-
-        //check if username is not empty
-        if (!$name) {
-            $errors['name'] = 'Fullname Required';
-        }
-
-        //check if email is not empty
-        if (!$email) {
-            $errors['email'] = 'Email Required';
-        }
-
-        //check if email doesn't exist already
-        if (!isset($errors['email']) && $this->userRepository->isUserExistByEmail($email)) {
-            $errors['email'] = 'Email Already Exist';
-        }
-
-        // Check if password is not empty.
-        if (empty($password)) {
-            $errors['password'] = 'Password Required';
-        }
-
-        //check if password and confirm password are the same
-        if (!isset($errors['password']) && $password !== $confirmPassword) {
-            $errors['confirmPassword'] = 'Passwords Don"t Match';
-        }
-
-        return $errors;
+        return $this->userRepository->isUserExistByEmail($email);
     }
 
     private function hashPassword(string $password): string

@@ -9,13 +9,14 @@ class SecureSession
         ini_set('session.use_only_cookies', $config['Session']['UseOnlyCookies']);
 
         $cookieParams = session_get_cookie_params();
-        session_set_cookie_params(
-            $cookieParams["lifetime"],
-            $cookieParams["path"],
-            $cookieParams["domain"],
-            $config['Session']['Secure'],
-            $config['Session']['HttpOnly']
-        );
+        session_set_cookie_params([
+            'lifetime' => $cookieParams["lifetime"],
+            'path' => $cookieParams["path"],
+            'domain' => $cookieParams["domain"],
+            'secure' => $config['Session']['Secure'],
+            'httponly' => $config['Session']['HttpOnly'],
+            'samesite' => 'Lax',
+        ]);
 
         session_start();
     }

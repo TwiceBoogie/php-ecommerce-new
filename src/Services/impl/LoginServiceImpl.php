@@ -72,6 +72,15 @@ class LoginServiceImpl implements LoginService
     public function logout(): ResponseDTO
     {
         $userId = SecureSession::get('user_id');
+        if (!$userId) {
+            return new ResponseDTO(
+                'error',
+                'Bad error request',
+                [],
+                [],
+                400
+            );
+        }
         $cart = $this->cartRepository->getCart($userId, 'user_id');
         SecureSession::destroySession();
         SecureSession::regenerate();
