@@ -1,10 +1,7 @@
 import $ from "jquery";
 
 import "./setup.js";
-import Register from "./register.js";
-import UserSettings from "./userSettings.js";
-import Cart from "./cart.js";
-import Login from "./login.js";
+import { Register, UserSettings, Cart, Login } from "@modules";
 
 $(function () {
   UserSettings.init();
@@ -12,7 +9,7 @@ $(function () {
   Cart.init();
   Login.init();
   if ($("orders-list").length) {
-    import("./orders.js")
+    import("@modules/orders.js")
       .then(({ default: Orders }) => {
         Orders.init();
       })

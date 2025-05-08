@@ -1,6 +1,4 @@
 import $ from "jquery";
-import Util from "./utils.js";
-import Http from "./http.js";
 
 const Orders = {
   /**

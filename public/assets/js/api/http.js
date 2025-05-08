@@ -1,4 +1,4 @@
-import Util from "./utils.js";
+import { ApiError } from "@utils";
 
 const Http = {
   /**
@@ -18,13 +18,48 @@ const Http = {
         body: JSON.stringify(data),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw errorData;
+        throw new ApiError(data, response.status);
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw new ApiError(
+          { message: error.message } || "Unexpected error has occured"
+        );
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Make an HTTP POST request using fetch.
+   *
+   * @param {string} url
+   * @param {Object} data
+   * @returns {Promise<Object>} Response data from the server.
+   */
+  async get(url) {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new ApiError(data, response.status);
+      }
+      return data;
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw new ApiError(
+          { message: error.message } || "Unexpected error has occured"
+        );
+      }
       throw error;
     }
   },

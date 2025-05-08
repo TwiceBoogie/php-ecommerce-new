@@ -1,7 +1,7 @@
 import $ from "jquery";
 import "jquery-validation";
-import Util from "./utils.js";
-import Http from "./http.js";
+import Util from "../utils/utils.js";
+import Http from "../api/http.js";
 
 const Register = {
   /**

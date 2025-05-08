@@ -1,6 +1,6 @@
 import $ from "jquery";
-import Util from "./utils.js";
-import Http from "./http.js";
+import { Util, ApiError } from "@utils";
+import Http from "@api/http.js";
 
 const Login = {
   /**
@@ -38,6 +38,23 @@ const Login = {
       submitHandler: function (form) {
         Login.submit(form);
       },
+    });
+    // logout button handler
+    $("#logout-button").on("click", async function (e) {
+      e.preventDefault();
+      try {
+        const response = await Http.get("/api/v1/auth/logout");
+        Util.showToast(response.message, response.status);
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 3000);
+      } catch (error) {
+        if (error instanceof ApiError) {
+          Util.showToast(error.message, "danger");
+        } else {
+          Util.showToast("Logout failed. Please try again.", "danger");
+        }
+      }
     });
   },
 

@@ -97,6 +97,18 @@ const Util = {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
   },
+
+  showToast(message, type = "success") {
+    const $toast = $("#app-toast");
+    const $body = $("#app-toast-body");
+
+    $body.text(message);
+    $toast
+      .removeClass()
+      .addClass(`toast align-items-center text-bg-${type} border-0`);
+    const toast = bootstrap.Toast.getOrCreateInstance($toast[0]);
+    toast.show();
+  },
 };
 
 export default Util;
