@@ -54,8 +54,9 @@ function wait_for($hostname, $port, $timeout = 30)
     }
 }
 
-function include_partial($file)
+function include_partial($file, array $data = [])
 {
+    extract($data); // in order to bring it into local scope since functions have their own local scope
     $basePath = dirname(__DIR__, 2) . '/src/Views/partials/';
     include $basePath . ltrim($file, '/');
 }
