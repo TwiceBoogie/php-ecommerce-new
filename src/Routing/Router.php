@@ -21,6 +21,7 @@ class Router
 {
     private array $routes = [];
     private array $middlewares = [];
+    private array $globalMiddlewares = [];
     private $container;
 
     public function __construct($container)
@@ -52,9 +53,9 @@ class Router
     public function generateRouteCache(): void
     {
         // Dynamically scan controllers and collect routes
-        $this->register('/', HomeController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
-        $this->register('/products', ShopController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
-        $this->register('/product/{id}', ShopController::class, 'show', ['GET'], [IsAdminMiddleware::class]);
+        $this->register('/', HomeController::class, 'index', ['GET']);
+        $this->register('/products', ShopController::class, 'index', ['GET']);
+        $this->register('/product/{id}', ShopController::class, 'show', ['GET']);
         $this->register('/contact', ContactController::class, 'index', ['GET'], [AuthMiddleware::class]);
         $this->register('/login', LoginController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/register', RegisterController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
@@ -78,6 +79,7 @@ class Router
     public function handleRequest($path, $method)
     {
         foreach ($this->routes as $route) {
+            // converts '/products/{id}' into '/product/([^/]+)' that way you can use preg_match() and extract dynamic values
             $pattern = preg_replace('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', '([^/]+)', $route['path']);
             $pattern = '#^' . $pattern . '$#';
 
@@ -85,7 +87,7 @@ class Router
                 array_shift($matches);
 
                 $controller = $this->container[$route['controller']] ?? null;
-                $action = $route['method'];
+                $action = $route['method']; // class method name
 
                 if (!$controller) {
                     // Response::send(['error' => "Controller not found: {$route['controller']}"], 500);
@@ -96,9 +98,9 @@ class Router
                     // Response::send(['error' => "Method '{$action}' not found in controller '{$route['controller']}'"], 500);
                     return $this->handleNotFound($path);
                 }
-
+                $allMiddlewares = array_merge($this->globalMiddlewares, $route['middlewares']);
                 // Execute middleware before calling the controller
-                $this->runMiddlewares($route['middlewares'], function () use ($controller, $action, $matches) {
+                $this->runMiddlewares($allMiddlewares, function () use ($controller, $action, $matches) {
                     // Create a proper Request object
                     $request = new Request();
 
@@ -122,6 +124,11 @@ class Router
         return $this->handleNotFound($path);
     }
 
+    public function addGlobalMiddlewares(string ...$middleware)
+    {
+        $this->globalMiddlewares = array_merge($this->globalMiddlewares, $middleware);
+    }
+
     private function handleNotFound(string $path)
     {
         // Check if the request is an API request
@@ -133,24 +140,25 @@ class Router
         }
     }
 
-
+    // recurseive/stack-based execuationn.
     private function runMiddlewares(array $middlewares, callable $next)
     {
+        // reverse array bcs array_reduce() builds chain from last to first
         $stack = array_reverse($middlewares);
 
         $middlewareChain = array_reduce($stack, function ($next, $middleware) {
             return function ($request) use ($middleware, $next) {
                 if (!$request instanceof Request) {
-                    $request = new Request(); // ✅ Ensure it's always a Request object
+                    $request = new Request(); // Ensure it's always a Request object
                 }
 
-                $middlewareInstance = $this->container[$middleware] ?? new $middleware();
+                $middlewareInstance = $this->container[$middleware];
                 return $middlewareInstance->handle($request, $next);
             };
-        }, function ($request) use ($next) {
+        }, function ($request) use ($next) { // fallback or 'final' callable if $stack is empty which skipps the callback
             return $next($request);
         });
 
-        return $middlewareChain(new Request()); // ✅ Ensure it starts with a Request object
+        return $middlewareChain(new Request()); // Ensure it starts with a Request object
     }
 }
