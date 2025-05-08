@@ -2,7 +2,10 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
+use Sebastian\PhpEcommerce\Http\Request;
+use Sebastian\PhpEcommerce\Http\Request\RegisterRequest;
 use Sebastian\PhpEcommerce\Services\RegisterService;
+use Sebastian\PhpEcommerce\Views\Models\GenericViewModel;
 use Sebastian\PhpEcommerce\Views\View;
 use Sebastian\PhpEcommerce\Services\Response;
 
@@ -15,19 +18,20 @@ class RegisterController
         $this->registerService = $registerService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return View::render('register.index');
+        return View::render('register.index', [
+            "viewModel" => new GenericViewModel(
+                $request->isAdmin(),
+                $request->isAuthenticated()
+            )
+        ]);
     }
 
-    public function register()
+    public function register(Request $request)
     {
-        $input = json_decode(file_get_contents('php://input'), true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return Response::send(['error' => 'Invalid JSON input'], 400);
-        }
-        $response = $this->registerService->register($input);
+        $registerRequest = new RegisterRequest($request->getBody());
+        $response = $this->registerService->register($registerRequest);
         return Response::send($response->toArray(), $response->getStatusCode());
     }
 }

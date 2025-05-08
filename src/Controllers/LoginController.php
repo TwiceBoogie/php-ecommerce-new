@@ -5,6 +5,7 @@ namespace Sebastian\PhpEcommerce\Controllers;
 use Sebastian\PhpEcommerce\Http\Request;
 use Sebastian\PhpEcommerce\Http\Request\LoginRequest;
 use Sebastian\PhpEcommerce\Services\LoginService;
+use Sebastian\PhpEcommerce\Views\Models\GenericViewModel;
 use Sebastian\PhpEcommerce\Views\View;
 use Sebastian\PhpEcommerce\Services\Response;
 
@@ -19,7 +20,12 @@ class LoginController
 
     public function index(Request $request): bool|string
     {
-        return View::render('login.index');
+        return View::render('login.index', [
+            "viewModel" => new GenericViewModel(
+                $request->isAdmin(),
+                $request->isAuthenticated()
+            )
+        ]);
     }
 
     public function login(Request $request)

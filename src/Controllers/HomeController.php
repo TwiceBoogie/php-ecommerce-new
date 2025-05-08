@@ -19,14 +19,15 @@ class HomeController
 
     public function index(Request $request): bool|string
     {
-        $isAdmin = $request->isAdmin;
+        $isAdmin = $request->isAdmin();
+        $isAuthenticated = $request->isAuthenticated();
         $keyboards = $this->homeService->getProductsByCategory('keyboards', 4);
         $mice = $this->homeService->getProductsByCategory('mice', 4);
 
-        $homeViewModel = new HomeViewModel($isAdmin, $mice, $keyboards);
+        $homeViewModel = new HomeViewModel($isAdmin, $isAuthenticated, $mice, $keyboards);
 
         return View::render('home.index', [
-            'home' => $homeViewModel
+            'viewModel' => $homeViewModel
         ]);
     }
 }

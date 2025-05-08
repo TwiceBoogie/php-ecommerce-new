@@ -2,9 +2,9 @@
 
 namespace Sebastian\PhpEcommerce\Controllers;
 
+use Sebastian\PhpEcommerce\Http\Request;
 use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Services\Response;
-use function Sebastian\PhpEcommerce\Helpers\app;
 
 class CartController
 {
@@ -15,13 +15,13 @@ class CartController
         $this->cartService = $cartService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $cart = $_SESSION['cart'] ?? [];
         return Response::send(['cart' => $cart], 200);
     }
 
-    public function add()
+    public function add(Request $request)
     {
         $input = file_get_contents('php://input');
         $decodedInput = json_decode($input, true);
@@ -44,7 +44,7 @@ class CartController
         ], 200);
     }
 
-    public function clear()
+    public function clear(Request $request)
     {
         unset($_SESSION['cart']);
         return Response::send(['message' => 'Cart cleared'], 200);

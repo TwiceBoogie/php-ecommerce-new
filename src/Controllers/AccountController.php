@@ -20,11 +20,12 @@ class AccountController
 
     public function index(Request $request)
     {
-        $isAdmin = $request->isAdmin;
+        $isAdmin = $request->isAdmin();
+        $isAuthenticated = $request->isAuthenticated();
         $userDetails = $this->userService->getUserDetails();
-        $accountViewModel = new AccountViewModel($userDetails, $isAdmin);
+        $accountViewModel = new AccountViewModel($isAdmin, $isAuthenticated, $userDetails);
         return View::render('account.index', [
-            'account' => $accountViewModel
+            'viewModel' => $accountViewModel
         ]);
     }
 

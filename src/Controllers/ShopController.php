@@ -19,25 +19,27 @@ class ShopController
 
     public function index(Request $request): bool|string
     {
-        $isAdmin = $request->isAdmin;
+        $isAdmin = $request->isAdmin();
+        $isAuthenticated = $request->isAuthenticated();
         $products = $this->shopService->getAllProduct();
 
-        $shopViewModel = new ShopViewModel($isAdmin, $products);
+        $shopViewModel = new ShopViewModel($isAdmin, $isAuthenticated, $products);
 
         return View::render('shop.index', [
-            'shop' => $shopViewModel
+            'viewModel' => $shopViewModel
         ]);
     }
 
     public function show(Request $request, string $id): bool|string
     {
-        $isAdmin = $request->isAdmin;
+        $isAdmin = $request->isAdmin();
+        $isAuthenticated = $request->isAuthenticated();
         $product = $this->shopService->getProduct($id);
 
-        $shopViewModel = new ShopViewModel($isAdmin, [], $product);
+        $shopViewModel = new ShopViewModel($isAdmin, $isAuthenticated, [], $product);
 
         return View::render('shop.single', [
-            'shop' => $shopViewModel
+            'viewModel' => $shopViewModel
         ]);
     }
 }

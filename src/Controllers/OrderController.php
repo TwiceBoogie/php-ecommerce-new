@@ -17,7 +17,6 @@ class OrderController
 
     public function index(Request $request)
     {
-        $isAdmin = $request->isAdmin;
         $response = $this->orderService->getOrders();
 
         return Response::send($response->toArray(), $response->getStatusCode());
