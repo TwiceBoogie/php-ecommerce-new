@@ -2,9 +2,15 @@
 
 use Dotenv\Dotenv;
 
+$envPath = __DIR__ . '/../.env';
+if (!file_exists($envPath)) {
+    error_log(".env not found at: $envPath");
+    die('Missing .env file');
+}
+
 // Load .env
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
+$dotenv->safeLoad();
 
 // Base config
 $config = [

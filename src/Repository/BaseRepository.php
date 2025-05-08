@@ -35,6 +35,12 @@ abstract class BaseRepository
         $this->table = $table;
     }
 
+    public function findBy(string $column, mixed $value)
+    {
+        $sql = "SELECT * FROM `$this->table` WHERE `$column` = :value";
+        return $this->db->select($sql, ['value' => $value]);
+    }
+
     /**
      * Retrieves all records from the table with optional sorting.
      *

@@ -1,5 +1,9 @@
 import path from "path";
+import { fileURLToPath } from "url";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default {
   entry: {
@@ -9,6 +13,13 @@ export default {
   output: {
     filename: "[name].bundle.js",
     path: path.resolve(process.cwd(), "public/dist"),
+  },
+  resolve: {
+    alias: {
+      "@utils": path.resolve(__dirname, "public/assets/js/utils"),
+      "@api": path.resolve(__dirname, "public/assets/js/api"),
+      "@modules": path.resolve(__dirname, "public/assets/js/modules"),
+    },
   },
   mode: "development",
   devtool: "source-map",

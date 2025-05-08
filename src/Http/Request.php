@@ -8,8 +8,9 @@ class Request
     private array $query;
     private string $method;
     private string $path;
-    public ?object $user = null;
-    public bool $isAdmin = false;
+    private bool $isAuthenticated = false;
+    private ?object $user = null;
+    private bool $isAdmin = false;
 
     public function __construct()
     {
@@ -43,6 +44,26 @@ class Request
 
         // For form data or other content types, fallback to $_POST
         return $_POST;
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return $this->isAuthenticated;
+    }
+
+    public function setAuthenticated(bool $value): void
+    {
+        $this->isAuthenticated = $value;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
+    }
+
+    public function setAdmin(bool $value): void
+    {
+        $this->isAdmin = $value;
     }
 
     /**

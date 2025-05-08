@@ -1,5 +1,6 @@
 <?php
 
+use Sebastian\PhpEcommerce\Middleware\InjectAuthContextMiddleware;
 use Sebastian\PhpEcommerce\Routing\Router;
 use Sebastian\PhpEcommerce\Services\Container;
 use Sebastian\PhpEcommerce\Services\SecureSession;
@@ -28,3 +29,4 @@ Container::setContainer($container);
 
 $router = new Router($container);
 $router->loadCachedRoutes();
+$router->addGlobalMiddlewares(InjectAuthContextMiddleware::class);

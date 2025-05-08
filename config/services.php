@@ -3,7 +3,10 @@
 use Pimple\Container;
 use Sebastian\PhpEcommerce\Controllers\OrderController;
 use Sebastian\PhpEcommerce\Controllers\RegisterController;
+use Sebastian\PhpEcommerce\Middleware\AuthMiddleware;
 use Sebastian\PhpEcommerce\Middleware\IsAdminMiddleware;
+use Sebastian\PhpEcommerce\Middleware\RedirectIfAuthMiddleware;
+use Sebastian\PhpEcommerce\Middleware\InjectAuthContextMiddleware;
 use Sebastian\PhpEcommerce\Models\Database;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\OrderRepository;
@@ -177,9 +180,21 @@ $container[AuthService::class] = function ($c) {
     return new AuthServiceImpl($userRepository);
 };
 
-$container[IsAdminMiddleware::class] = function ($c) {
+$container[InjectAuthContextMiddleware::class] = function ($c) {
     $authService = $c[AuthService::class];
-    return new IsAdminMiddleware($authService);
+    return new InjectAuthContextMiddleware($authService);
+};
+
+$container[AuthMiddleware::class] = function ($c) {
+    return new AuthMiddleware();
+};
+
+$container[IsAdminMiddleware::class] = function ($c) {
+    return new IsAdminMiddleware();
+};
+
+$container[RedirectIfAuthMiddleware::class] = function ($c) {
+    return new RedirectIfAuthMiddleware();
 };
 
 $container[OrderController::class] = function ($c) {
