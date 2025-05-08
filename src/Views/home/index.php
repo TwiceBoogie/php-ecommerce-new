@@ -1,13 +1,12 @@
 <?php
 
 /**
- * @var \Sebastian\PhpEcommerce\Views\Models\HomeViewModel $home;
+ * @var \Sebastian\PhpEcommerce\Views\Models\HomeViewModel $viewModel;
  */
 
 use function Sebastian\PhpEcommerce\Helpers\include_partial;
-$isAdmin = $home->isAdmin();
 
-include_partial('header.php');
+include_partial('header.php', ['viewModel' => $viewModel]);
 ?>
 
 <main>
@@ -61,7 +60,7 @@ include_partial('header.php');
         </div>
         <div class="row mx-auto container-fluid">
 
-            <?php foreach ($home->getKeyboards() as $keyboard): ?>
+            <?php foreach ($viewModel->getKeyboards() as $keyboard): ?>
                 <div class="product text-center col-lg-3 col-md-4 col-sm-12">
                     <a href="/product/<?= $keyboard->getId(); ?>"><img class="img-fluid mb-3"
                             src="/assets/imgs/<?= $keyboard->getPrimaryImage() ?>" /></a>
@@ -99,7 +98,7 @@ include_partial('header.php');
         </div>
         <div class="row mx-auto container-fluid">
 
-            <?php foreach ($home->getMice() as $mouse): ?>
+            <?php foreach ($viewModel->getMice() as $mouse): ?>
                 <div class="product text-center col-lg-3 col-md-4 col-sm-12">
                     <a href="/product/<?= $mouse->getId(); ?>"><img class="img-fluid mb-3"
                             src="/assets/imgs/<?= $mouse->getPrimaryImage(); ?>" /></a>

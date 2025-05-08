@@ -4,25 +4,19 @@ namespace Sebastian\PhpEcommerce\Views\Models;
 
 use Sebastian\PhpEcommerce\DTO\ProductDTO;
 
-class ShopViewModel
+class ShopViewModel extends BaseViewModel
 {
-    private bool $isAdmin;
     /**
      * @var ProductDTO[]
      */
     private array $products = [];
     private ?ProductDTO $product;
 
-    public function __construct(bool $isAdmin, array $products = [], ?ProductDTO $product = null)
+    public function __construct(bool $isAdmin, bool $isAuthenticated, array $products = [], ?ProductDTO $product = null)
     {
-        $this->isAdmin = $isAdmin;
+        parent::__construct($isAdmin, $isAuthenticated);
         $this->products = $products;
         $this->product = $product;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->isAdmin;
     }
 
     /**

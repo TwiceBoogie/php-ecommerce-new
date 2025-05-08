@@ -4,7 +4,7 @@ namespace Sebastian\PhpEcommerce\Views\Models;
 
 use Sebastian\PhpEcommerce\DTO\ProductDTO;
 
-class HomeViewModel
+class HomeViewModel extends BaseViewModel
 {
     /**
      * @var ProductDTO[]
@@ -16,23 +16,17 @@ class HomeViewModel
      */
     private array $keyboards;
 
-    private bool $isAdmin;
-
     /**
      * @param bool $isAdmin
+     * @param bool $isAuthenticated
      * @param ProductDTO[] $mice
      * @param ProductDTO[] $keyboards
      */
-    public function __construct(bool $isAdmin, array $mice, array $keyboards)
+    public function __construct(bool $isAdmin, bool $isAuthenticated, array $mice, array $keyboards)
     {
-        $this->isAdmin = $isAdmin;
+        parent::__construct($isAdmin, $isAuthenticated);
         $this->mice = $mice;
         $this->keyboards = $keyboards;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->isAdmin;
     }
 
     /**

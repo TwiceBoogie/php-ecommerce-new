@@ -1,7 +1,11 @@
 <?php
 
-// Check if user is logged in and is admin
-$isAdmin = isset($isAdmin) && $isAdmin;
+/**
+ * @var \Sebastian\PhpEcommerce\Views\Models\BaseViewModel $viewModel;
+ */
+
+$isAdmin = $viewModel->isAdmin();
+$isAuthenticated = $viewModel->isAuthenticated();
 ?>
 
 <!DOCTYPE html>
@@ -20,17 +24,32 @@ $isAdmin = isset($isAdmin) && $isAdmin;
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
         integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous" />
 
+
     <link rel="stylesheet" href="/assets/css/style.css" />
 
 </head>
 
 <body>
+    <!--Toast-->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="app-toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="app-toast-body">
+                    <!-- Dynamic message goes here -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <!--NavBar-->
     <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3 fixed-top">
         <div class="container-fluid">
-            <!-- <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="/">
                 <img class="logo" src="/assets/imgs/logo.jpg" alt="Logo" style="height: 50px;">
-            </a> -->
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -59,9 +78,14 @@ $isAdmin = isset($isAdmin) && $isAdmin;
 
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/account">Account</a></li>
-                                <li><a class="dropdown-item" href="/orders">Orders</a></li>
-                                <li><a class="dropdown-item">logout</a></li>
+                                <?php if ($isAuthenticated): ?>
+                                    <li><a class="dropdown-item" href="/account">Account</a></li>
+                                    <li><a class="dropdown-item" href="/orders">Orders</a></li>
+                                    <li><button class="dropdown-item" id="logout-button">logout</button></li>
+                                <?php else: ?>
+                                    <li><a class="dropdown-item" href="/login">Login</a></li>
+                                    <li><a class="dropdown-item" href="/register">Register</a></li>
+                                <?php endif; ?>
                             </ul>
                         </div>
                     </li>

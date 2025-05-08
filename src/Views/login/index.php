@@ -1,7 +1,12 @@
 <?php
+
+/**
+ * @var \Sebastian\PhpEcommerce\Views\Models\HomeViewModel $viewModel;
+ */
+
 use function Sebastian\PhpEcommerce\Helpers\include_partial;
 
-include_partial('header.php');
+include_partial('header.php', ['viewModel' => $viewModel]);
 ?>
 <!--Login-->
 <div id="main-wrapper" class="container mt-5">

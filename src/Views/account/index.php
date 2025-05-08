@@ -1,12 +1,11 @@
 <?php
 /**
- * @var \Sebastian\PhpEcommerce\Views\Models\AccountViewModel $account
+ * @var \Sebastian\PhpEcommerce\Views\Models\AccountViewModel $viewModel
  */
 
 use function Sebastian\PhpEcommerce\Helpers\include_partial;
 
-$isAdmin = $account->isAdmin();
-include_partial('header.php');
+include_partial('header.php', ['viewModel' => $viewModel]);
 
 ?>
 
@@ -22,14 +21,14 @@ include_partial('header.php');
                                 <img src="https://bootdey.com/img/Content/avatar/avatar6.png" alt="Admin"
                                     class="rounded-circle p-1 bg-primary" width="110">
                                 <div class="mt-3">
-                                    <h4><?= $account->getName(); ?></h4>
+                                    <h4><?= $viewModel->getName(); ?></h4>
                                     <p class="text-secondary mb-1">Registered:
-                                        <span><?= $account->getRegisterDate(); ?></span>
+                                        <span><?= $viewModel->getRegisterDate(); ?></span>
                                     </p>
                                 </div>
                                 <div class="mt-3">
                                     <p class="text-secondary mb-1">Email:
-                                        <span><?= $account->getEmail(); ?></span>
+                                        <span><?= $viewModel->getEmail(); ?></span>
                                     </p>
                                     <!-- <button class="btn btn-primary">Follow</button> -->
                                     <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
@@ -79,7 +78,7 @@ include_partial('header.php');
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     <input type="text" class="form-control" name="name"
-                                        value="<?= $account->getName(); ?>">
+                                        value="<?= $viewModel->getName(); ?>">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -88,7 +87,7 @@ include_partial('header.php');
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     <input type="text" class="form-control" name="phone"
-                                        value="<?= $account->getPhone(); ?>">
+                                        value="<?= $viewModel->getPhone(); ?>">
                                 </div>
                             </div>
                             <div class="row mb-3">
@@ -97,7 +96,7 @@ include_partial('header.php');
                                 </div>
                                 <div class="col-sm-9 text-secondary">
                                     <input type="text" class="form-control" name="address"
-                                        value="<?= $account->getAddress(); ?>">
+                                        value="<?= $viewModel->getAddress(); ?>">
                                 </div>
                             </div>
                             <div class="row mb-3 justify-content-center">
@@ -106,14 +105,14 @@ include_partial('header.php');
                                 </div>
                                 <div class="col-sm-4 text-secondary">
                                     <input type="text" class="form-control" name="city"
-                                        value="<?= $account->getCity(); ?>">
+                                        value="<?= $viewModel->getCity(); ?>">
                                 </div>
                                 <div class="col-sm-2">
                                     <h6 class="mb-0">State</h6>
                                 </div>
                                 <div class="col-sm-4 text-secondary">
                                     <input type="text" class="form-control" name="state"
-                                        value="<?= $account->getState(); ?>">
+                                        value="<?= $viewModel->getState(); ?>">
                                 </div>
                             </div>
                             <div class="row mb-3 justify-content-center">
@@ -122,14 +121,14 @@ include_partial('header.php');
                                 </div>
                                 <div class="col-sm-4 text-secondary">
                                     <input type="text" class="form-control" name="postal"
-                                        value="<?= $account->getPostalCode(); ?>">
+                                        value="<?= $viewModel->getPostalCode(); ?>">
                                 </div>
                                 <div class="col-sm-2">
                                     <h6 class="mb-0">Country</h6>
                                 </div>
                                 <div class="col-sm-4 text-secondary">
                                     <input type="text" class="form-control" name="country"
-                                        value="<?= $account->getCountry(); ?>">
+                                        value="<?= $viewModel->getCountry(); ?>">
                                 </div>
                             </div>
                             <div class="row justify-content-center">

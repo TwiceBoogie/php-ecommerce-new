@@ -4,25 +4,19 @@ namespace Sebastian\PhpEcommerce\Views\Models;
 
 use Sebastian\PhpEcommerce\DTO\UserDetailsDTO;
 
-class AccountViewModel
+class AccountViewModel extends BaseViewModel
 {
     private UserDetailsDTO $userDetails;
-    private bool $isAdmin;
 
-    public function __construct(UserDetailsDTO $userDetails, bool $isAdmin)
+    public function __construct(bool $isAdmin, bool $isAuthenticated, UserDetailsDTO $userDetails)
     {
+        parent::__construct($isAdmin, $isAuthenticated);
         $this->userDetails = $userDetails;
-        $this->isAdmin = $isAdmin;
     }
 
     public function getUserDetails(): UserDetailsDTO
     {
         return $this->userDetails;
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->isAdmin;
     }
 
     public function getName(): string

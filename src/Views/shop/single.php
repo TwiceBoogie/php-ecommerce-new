@@ -1,11 +1,12 @@
 <?php
 /**
- * @var \Sebastian\PhpEcommerce\Views\Models\ShopViewModel $shop
+ * @var \Sebastian\PhpEcommerce\Views\Models\ShopViewModel $viewModel
  */
 use function Sebastian\PhpEcommerce\Helpers\include_partial;
 
-$isAdmin = $shop->isAdmin();
-include_partial('header.php');
+include_partial('header.php', ['viewModel' => $viewModel]);
+
+$product = $viewModel->getProduct();
 ?>
 
 
@@ -34,10 +35,10 @@ include_partial('header.php');
     </div>
     <div class="row mt-5">
         <div class="col-lg-5 col-md-6 col-sm-12">
-            <img class="img-fluid w-100 pb-1"
-                src="/assets/imgs/<?= htmlspecialchars($shop->getProduct()->getPrimaryImage()); ?>" id="mainImg" />
+            <img class="img-fluid w-100 pb-1" src="/assets/imgs/<?= htmlspecialchars($product->getPrimaryImage()); ?>"
+                id="mainImg" />
             <div class="small-image-group">
-                <?php foreach ($shop->getProduct()->getImages() as $image): ?>
+                <?php foreach ($product->getImages() as $image): ?>
                     <div class="small-image-col">
                         <img src="/assets/imgs/<?= htmlspecialchars($image); ?>" width="100%" class="small-image" />
                     </div>
@@ -46,20 +47,20 @@ include_partial('header.php');
         </div>
         <div class="col-lg-6 col-md-12 col-sm-12">
             <h6>Keyboards/Mice</h6>
-            <h3 class="py-4"><?= $shop->getProduct()->getName(); ?></h3>
-            <h2>$<?= $shop->getProduct()->getPrice(); ?></h2>
+            <h3 class="py-4"><?= $product->getName(); ?></h3>
+            <h2>$<?= $product->getPrice(); ?></h2>
 
             <div class="quantity-container">
-                <input type="number" class="product-quantity" min="1" max=<?= $shop->getProduct()->getQuantity(); ?>
-                    value="1" data-product-id="<?= $shop->getProduct()->getId(); ?>" />
-                <button class="buy-btn add-to-cart-btn" data-product-id="<?= $shop->getProduct()->getId(); ?>">
+                <input type="number" class="product-quantity" min="1" max=<?= $product->getQuantity(); ?> value="1"
+                    data-product-id="<?= $product->getId(); ?>" />
+                <button class="buy-btn add-to-cart-btn" data-product-id="<?= $product->getId(); ?>">
                     Add to Cart
                 </button>
             </div>
 
 
             <h4 class="mt-5 mb-5">Product Details</h4>
-            <span><?= $shop->getProduct()->getDescription(); ?></span>
+            <span><?= $product->getDescription(); ?></span>
         </div>
     </div>
 </section>
