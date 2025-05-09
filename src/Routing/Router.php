@@ -56,10 +56,10 @@ class Router
         $this->register('/', HomeController::class, 'index', ['GET']);
         $this->register('/products', ShopController::class, 'index', ['GET']);
         $this->register('/product/{id}', ShopController::class, 'show', ['GET']);
-        $this->register('/contact', ContactController::class, 'index', ['GET'], [AuthMiddleware::class]);
+        $this->register('/contact', ContactController::class, 'index', ['GET']);
         $this->register('/login', LoginController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/register', RegisterController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
-        $this->register('/account', AccountController::class, 'index', ['GET'], [AuthMiddleware::class, IsAdminMiddleware::class]);
+        $this->register('/account', AccountController::class, 'index', ['GET'], [AuthMiddleware::class]);
 
         $this->register('/api/v1/cart', CartController::class, 'index', ['GET']);
         $this->register('/api/v1/cart/add', CartController::class, 'add', ['POST']);
@@ -67,8 +67,9 @@ class Router
         $this->register('/api/v1/auth/logout', LoginController::class, 'logout', ['GET']);
         $this->register('/api/v1/auth/login', LoginController::class, 'login', ['POST'], [RedirectIfAuthMiddleware::class]);
         $this->register('/api/v1/auth/register', RegisterController::class, 'register', ['POST'], [RedirectIfAuthMiddleware::class]);
-        $this->register('/api/v1/orders', OrderController::class, 'index', ['GET'], [IsAdminMiddleware::class]);
-        $this->register('/api/v1/user/settings', AccountController::class, 'updateUserDetails', ['POST'], [AuthMiddleware::class]);
+        $this->register('/api/v1/orders', OrderController::class, 'index', ['GET'], [AuthMiddleware::class]);
+        $this->register('/api/v1/user/settings/update', AccountController::class, 'updateUserDetails', ['PUT'], [AuthMiddleware::class]);
+        $this->register('/api/v1/user/settings/update/email', AccountController::class, 'updateEmail', ['PUT'], [AuthMiddleware::class]);
 
         file_put_contents(
             __DIR__ . '/../../storage/cache/routes.php',
@@ -99,10 +100,9 @@ class Router
                     return $this->handleNotFound($path);
                 }
                 $allMiddlewares = array_merge($this->globalMiddlewares, $route['middlewares']);
+                $request = new Request();
                 // Execute middleware before calling the controller
-                $this->runMiddlewares($allMiddlewares, function () use ($controller, $action, $matches) {
-                    // Create a proper Request object
-                    $request = new Request();
+                $this->runMiddlewares($allMiddlewares, function (Request $request) use ($controller, $action, $matches) {
 
                     // Pass $request to the controller
                     $response = $controller->$action($request, ...array_values($matches));
@@ -114,7 +114,7 @@ class Router
                     } else {
                         Response::send(['error' => 'Invalid response type'], 500);
                     }
-                });
+                }, $request);
 
                 return;
             }
@@ -141,24 +141,20 @@ class Router
     }
 
     // recurseive/stack-based execuationn.
-    private function runMiddlewares(array $middlewares, callable $next)
+    private function runMiddlewares(array $middlewares, callable $next, Request $request)
     {
         // reverse array bcs array_reduce() builds chain from last to first
         $stack = array_reverse($middlewares);
 
         $middlewareChain = array_reduce($stack, function ($next, $middleware) {
-            return function ($request) use ($middleware, $next) {
-                if (!$request instanceof Request) {
-                    $request = new Request(); // Ensure it's always a Request object
-                }
-
+            return function (Request $request) use ($middleware, $next) {
                 $middlewareInstance = $this->container[$middleware];
                 return $middlewareInstance->handle($request, $next);
             };
-        }, function ($request) use ($next) { // fallback or 'final' callable if $stack is empty which skipps the callback
+        }, function (Request $request) use ($next) { // fallback or 'final' callable if $stack is empty which skipps the callback
             return $next($request);
         });
 
-        return $middlewareChain(new Request()); // Ensure it starts with a Request object
+        return $middlewareChain($request);
     }
 }
