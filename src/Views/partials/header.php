@@ -21,15 +21,16 @@ $isAuthenticated = $viewModel->isAuthenticated();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
-        integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
     <link rel="stylesheet" href="/assets/css/style.css" />
 
 </head>
 
-<body>
+<body class="pt-5">
     <!--Toast-->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
         <div id="app-toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
@@ -56,22 +57,22 @@ $isAuthenticated = $viewModel->isAuthenticated();
             </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a class="nav-link" href="/products">Shop</a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="/contact">Contact Us</a>
-                    </li>
+                    </li> -->
                     <?php if ($isAdmin): ?>
                         <li class="nav-item">
                             <a class="nav-link text-danger fw-bold" href="/admin/users">Admin Panel</a>
                         </li>
                     <?php endif; ?>
                     <li class="nav-item d-flex">
-                        <a class="nav-link me-3" href="/cart"><i class="fas fa-shopping-bag"></i></a>
+                        <a class="nav-link me-3" href="/cart">Cart</a>
                         <div class="dropdown">
                             <button class="btn btn-primary dropdown-toggle fas fa-user" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">

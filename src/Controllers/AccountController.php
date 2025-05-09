@@ -3,6 +3,7 @@
 namespace Sebastian\PhpEcommerce\Controllers;
 
 use Sebastian\PhpEcommerce\Http\Request;
+use Sebastian\PhpEcommerce\Http\Request\UpdateEmailRequest;
 use Sebastian\PhpEcommerce\Http\Request\UpdateUserDetailsRequest;
 use Sebastian\PhpEcommerce\Services\Response;
 use Sebastian\PhpEcommerce\Services\UserService;
@@ -33,6 +34,13 @@ class AccountController
     {
         $userDetailsRequest = new UpdateUserDetailsRequest($request->getBody());
         $response = $this->userService->updateUserDetails($userDetailsRequest);
+        return Response::send($response->toArray(), $response->getStatusCode());
+    }
+
+    public function updateEmail(Request $request)
+    {
+        $updateEmailRequest = new UpdateEmailRequest($request->getBody());
+        $response = $this->userService->updateEmail($updateEmailRequest);
         return Response::send($response->toArray(), $response->getStatusCode());
     }
 }

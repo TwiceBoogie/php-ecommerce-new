@@ -49,5 +49,6 @@ if (file_exists($envConfigFile)) {
 }
 
 define('BASE_URL', $config['App']['Url']); // Define BASE_URL as a constant globally
+define('ENVIRONMENT', $config['App']['Environment']);
 
 return $config;

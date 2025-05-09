@@ -1,6 +1,6 @@
 import $ from "jquery";
-import { Util, ApiError } from "@utils";
-import Http from "@api/http.js";
+import { Util, ApiError } from "../utils/index.js";
+import { Http } from "../api/http.js";
 
 const Login = {
   /**
@@ -14,6 +14,7 @@ const Login = {
    * Attach event listeners for form validation and submission.
    */
   attachEventListeners: function () {
+    const self = this;
     $("#login-form").validate({
       rules: {
         email: {
@@ -36,7 +37,7 @@ const Login = {
         },
       },
       submitHandler: function (form) {
-        Login.submit(form);
+        self.submit(form);
       },
     });
     // logout button handler
@@ -69,7 +70,9 @@ const Login = {
       const response = await Http.post("/api/v1/auth/login", formData);
 
       // Redirect on success
-      window.location = response.page;
+      setTimeout(() => {
+        window.location = response.data.page;
+      }, 3000);
     } catch (error) {
       console.error("Login Error:", error);
       if (error.errors) {

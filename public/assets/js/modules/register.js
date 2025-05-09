@@ -1,7 +1,7 @@
 import $ from "jquery";
 import "jquery-validation";
-import Util from "../utils/utils.js";
-import Http from "../api/http.js";
+import { Util } from "../utils/index.js";
+import { Http } from "../api/http.js";
 
 const Register = {
   /**
@@ -64,11 +64,12 @@ const Register = {
     try {
       Util.removeErrorMessages();
       const formData = this.getRegisterFormData(form);
-      const response = await Http.post("/api/v1/auth/register", formData);
 
+      const response = await Http.post("/api/v1/auth/register", formData);
+      Util.showToast(response.message);
       // Redirect on success
       setTimeout(() => {
-        window.location = "/login";
+        window.location = "/";
       }, 3000);
     } catch (error) {
       console.error("Registration Error:", error);
@@ -78,7 +79,7 @@ const Register = {
         "Registration Failed",
         error.message || "An error occurred. Please try again."
       );
-      Util.showFormErrors(form, error);
+      Util.showFormErrors(form, error.errors);
     }
   },
 
@@ -91,8 +92,8 @@ const Register = {
     return {
       name: form["name"].value,
       email: form["email"].value,
-      password: HelpModules.Util.hash(form["password"].value),
-      confirmPassword: Util.hash(form["confirmPassword"].value),
+      password: form["password"].value,
+      confirmPassword: form["confirmPassword"].value,
     };
   },
 };

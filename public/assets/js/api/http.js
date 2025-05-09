@@ -1,6 +1,6 @@
 import { ApiError } from "@utils";
 
-const Http = {
+export const Http = {
   /**
    * Make an HTTP POST request using fetch.
    *
@@ -8,17 +8,53 @@ const Http = {
    * @param {Object} data
    * @returns {Promise<Object>} Response data from the server.
    */
-  async post(url, data = {}) {
+  async post(url, formData = {}) {
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        credentials: "include",
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
+      console.log(response);
+      if (!response.ok) {
+        throw new ApiError(data, response.status);
+      }
+
+      return data;
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw new ApiError(
+          { message: error.message } || "Unexpected error has occured"
+        );
+      }
+      throw error;
+    }
+  },
+  /**
+   * Make an HTTP PUT request using fetch.
+   *
+   * @param {string} url
+   * @param {Object} data
+   * @returns {Promise<Object>} Response data from the server.
+   */
+  async put(url, formData = {}) {
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log(data);
       if (!response.ok) {
         throw new ApiError(data, response.status);
       }
@@ -35,7 +71,7 @@ const Http = {
   },
 
   /**
-   * Make an HTTP POST request using fetch.
+   * Make an HTTP GET request using fetch.
    *
    * @param {string} url
    * @param {Object} data
@@ -48,6 +84,7 @@ const Http = {
         headers: {
           "Content-type": "application/json",
         },
+        credentials: "include",
       });
       const data = await response.json();
       if (!response.ok) {
@@ -63,33 +100,4 @@ const Http = {
       throw error;
     }
   },
-
-  // /**
-  //  * Submit a form via POST using fetch.
-  //  *
-  //  * @param {HTMLFormElement} form The form to submit.
-  //  * @param {Object} data The form data to send.
-  //  * @param {Function} onSuccess Callback to run on success.
-  //  * @param {Function} onError Callback to run on error.
-  //  */
-  // async submit(form, data, onSuccess, onError) {
-  //   Util.removeErrorMessages();
-
-  //   try {
-  //     const response = await HelpModules.Http.post(form.action, data);
-  //     form.reset();
-
-  //     if (typeof onSuccess === "function") {
-  //       onSuccess(response);
-  //     }
-  //   } catch (error) {
-  //     if (typeof onError === "function") {
-  //       onError(error);
-  //     } else {
-  //       HelpModules.Util.showFormErrors(form, error);
-  //     }
-  //   }
-  // },
 };
-
-export default Http;

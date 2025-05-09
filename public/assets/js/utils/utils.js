@@ -3,7 +3,7 @@ import $ from "jquery";
 /**
  * Utility functions for UI interactions and validation.
  */
-const Util = {
+export const Util = {
   /**
    * Display a success message in a modal.
    */
@@ -110,5 +110,3 @@ const Util = {
     toast.show();
   },
 };
-
-export default Util;

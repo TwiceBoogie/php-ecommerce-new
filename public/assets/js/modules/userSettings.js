@@ -1,6 +1,6 @@
 import $ from "jquery";
-import Util from "@utils/utils.js";
-import Http from "@api/http.js";
+import { ApiError, Util } from "../utils/index.js";
+import { Http } from "../api/http.js";
 
 const UserSettings = {
   init: function () {
@@ -56,17 +56,59 @@ const UserSettings = {
         },
       },
       submitHandler: function (form) {
-        self.submit(form);
+        self.submit(
+          form,
+          "/api/v1/user/settings/update",
+          self.getUserSettingsFormData
+        );
       },
     });
+
+    $("#emailChange-form").validate({
+      rules: {
+        email: {
+          email: true,
+          required: true,
+        },
+      },
+      messages: {
+        email: {
+          required: "Email is required",
+          email: "Please enter a valid email",
+        },
+      },
+      submitHandler: function (form) {
+        self.submit(
+          form,
+          "/api/v1/user/settings/update/email",
+          self.getEmailFormData
+        );
+      },
+    });
+
+    $("#emailForm-submitButton").on("click", function () {
+      if ($("#emailChange-form").valid()) {
+        $("#emailChange-form").trigger("submit");
+      }
+    });
   },
-  submit: async function (form) {
+  submit: async function (form, url, fn) {
     try {
       Util.removeErrorMessages();
-      const formData = this.getUserSettingsFormData(form);
-      const res = await Http.post("/api/v1/user/settings", formData);
-      console.log("hello", res);
-    } catch (error) {}
+      const formData = fn(form);
+      const res = await Http.put(url, formData);
+      Util.showToast(res.message);
+
+      setTimeout(() => {
+        window.location.reload();
+      });
+    } catch (error) {
+      console.error("User Settings update failed", error);
+      if (error instanceof ApiError) {
+        Util.displayErrorMessage("validation Failed", error.message);
+        Util.showFormErrors(form, error.errors);
+      }
+    }
   },
 
   /**
@@ -83,6 +125,12 @@ const UserSettings = {
       state: form["state"].value,
       postal: form["postal"].value,
       country: form["country"].value,
+    };
+  },
+
+  getEmailFormData: function (form) {
+    return {
+      email: form["email"].value,
     };
   },
 };

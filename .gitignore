@@ -8,6 +8,7 @@ package-lock.json
 /php_errors.log
 
 /public/uploads/
+/public/dist/
 /routes/
 
 # Environment configurations

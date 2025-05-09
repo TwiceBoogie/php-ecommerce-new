@@ -9,7 +9,6 @@ class Request
     private string $method;
     private string $path;
     private bool $isAuthenticated = false;
-    private ?object $user = null;
     private bool $isAdmin = false;
 
     public function __construct()
