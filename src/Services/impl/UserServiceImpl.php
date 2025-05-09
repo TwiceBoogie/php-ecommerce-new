@@ -4,6 +4,7 @@ namespace Sebastian\PhpEcommerce\Services\Impl;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
 use Sebastian\PhpEcommerce\DTO\UserDetailsDTO;
+use Sebastian\PhpEcommerce\Http\Request\UpdateEmailRequest;
 use Sebastian\PhpEcommerce\Mapper\UserMapper;
 use Sebastian\PhpEcommerce\Repository\UserRepository;
 use Sebastian\PhpEcommerce\Services\SecureSession;
@@ -23,7 +24,7 @@ class UserServiceImpl implements UserService
 
     public function getUserDetails(): UserDetailsDTO
     {
-        $userDetail = $this->userRepository->getUserDetails(SecureSession::get('user_id'));
+        $userDetail = $this->userRepository->getUserDetails(SecureSession::get('user')['id']);
         return $this->userMapper->mapToUserDTO($userDetail);
     }
 
@@ -45,7 +46,7 @@ class UserServiceImpl implements UserService
         $state = $request->getState();
         $postal = $request->getPostal();
         $country = $request->getCountry();
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
 
         try {
             $this->userRepository->updateUserDetails(
@@ -73,6 +74,41 @@ class UserServiceImpl implements UserService
                 501
             );
         }
+    }
+
+    public function updateEmail(UpdateEmailRequest $request): ResponseDTO
+    {
+        if ($request->fails()) {
+            return new ResponseDTO(
+                'error',
+                'Validation failed',
+                [],
+                $request->errors(),
+                400
+            );
+        }
+        $user = $this->userRepository->findById(SecureSession::get('user')['id']);
+        if ($user['user_email'] === $request->getEmail()) {
+            return new ResponseDTO(
+                'success',
+                'Email successfully updated',
+                [
+                    'email' => $user['user_email']
+                ],
+            );
+        }
+        $user = $this->userRepository->save([
+            "user_email" => $request->getEmail(),
+            "id" => SecureSession::get('user')['id']
+        ]);
+
+        return new ResponseDTO(
+            'success',
+            'Email successfully updated',
+            [
+                'email' => $user['user_email']
+            ]
+        );
     }
 
 }

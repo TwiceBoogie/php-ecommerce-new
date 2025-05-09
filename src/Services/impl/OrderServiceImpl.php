@@ -21,7 +21,7 @@ class OrderServiceImpl implements OrderService
 
     public function getOrders(): ResponseDTO
     {
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
         $orders = $this->orderRepository->getOrders($userId);
         $ordersDto = $this->orderMapper->mapToOrderDTOArray($orders);
         return new ResponseDTO(

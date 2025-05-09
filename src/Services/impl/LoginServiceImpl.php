@@ -45,21 +45,23 @@ class LoginServiceImpl implements LoginService
         if (count($user) !== 1) {
             return $this->handleInvalidLogin($email);
         }
-        if (!password_verify($password, $user[0]['password'])) {
+        if (!password_verify($password, $user[0]['user_password'])) {
             return $this->handleInvalidLogin($email);
         }
-        if ($user[0]['confirmed'] === "N") {
-            return new ResponseDTO(
-                'error',
-                'User not confirmed',
-                [],
-                ['email' => '', 'password' => 'User Not Confirmed'],
-                401
-            );
+        if (ENVIRONMENT === "production") {
+            if ($user[0]['confirmed'] === "N") {
+                return new ResponseDTO(
+                    'error',
+                    'User not confirmed',
+                    [],
+                    ['email' => '', 'password' => 'User Not Confirmed'],
+                    401
+                );
+            }
         }
         // TODO: merge users cart from session id to user id
         // creds are valid so make new login entry
-        $this->createUserSession($user[0]['user_id']);
+        $this->createUserSession($user[0]['id']);
         return new ResponseDTO(
             'success',
             'Login successful',
@@ -71,7 +73,7 @@ class LoginServiceImpl implements LoginService
 
     public function logout(): ResponseDTO
     {
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
         if (!$userId) {
             return new ResponseDTO(
                 'error',
@@ -83,7 +85,6 @@ class LoginServiceImpl implements LoginService
         }
         $cart = $this->cartRepository->getCart($userId, 'user_id');
         SecureSession::destroySession();
-        SecureSession::regenerate();
         if (count($cart) !== 0) {
             $this->cartRepository->handleLogoutCart($userId, SecureSession::getSessionId());
         }
@@ -122,7 +123,9 @@ class LoginServiceImpl implements LoginService
     private function createUserSession(int $userId)
     {
         SecureSession::regenerate();
-        SecureSession::set('user_id', $userId);
+        SecureSession::set('user', [
+            'id' => $userId
+        ]);
     }
 
 }

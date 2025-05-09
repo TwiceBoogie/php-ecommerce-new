@@ -27,6 +27,7 @@ class AuthServiceImpl implements AuthService
 
     private function getUserId(): int
     {
-        return SecureSession::get('user_id') ?? 0;
+        $user = SecureSession::get('user');
+        return is_array($user) && isset($user['id']) ? $user['id'] : 0;
     }
 }

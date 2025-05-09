@@ -24,7 +24,7 @@ class CartServiceImpl implements CartService
     public function getCart()
     {
         $sessionId = SecureSession::getSessionId();
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
         if (!$userId) {
             $cart = $this->cartRepository->getCartBySessionId($sessionId);
             return;
@@ -35,7 +35,7 @@ class CartServiceImpl implements CartService
     public function addToCart(int $productId, int $quantity): void
     {
         $sessionId = SecureSession::getSessionId();
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
 
         $column = $userId ? 'user_id' : 'session_id';
         $identifier = $userId ?? $sessionId;
@@ -65,7 +65,7 @@ class CartServiceImpl implements CartService
     private function getCartIdentifier(): string
     {
         $sessionId = SecureSession::getSessionId();
-        $userId = SecureSession::get('user_id');
+        $userId = SecureSession::get('user')['id'];
         return $userId ?: $sessionId;
     }
 }

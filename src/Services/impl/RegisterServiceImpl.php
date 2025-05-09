@@ -73,12 +73,14 @@ class RegisterServiceImpl implements RegisterService
             $user = $this->userRepository->save([
                 'user_name' => $name,
                 'user_email' => $email,
-                'user_password' => $this->hashPassword($hashedPassword),
+                'user_password' => $hashedPassword,
             ]);
             $userId = $user['id'];
             $this->userRepository->insertUserDetails($userId);
             SecureSession::regenerate();
-            SecureSession::set('user_id', $userId);
+            SecureSession::set('user', [
+                'id' => $userId
+            ]);
         });
     }
 
