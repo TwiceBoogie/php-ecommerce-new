@@ -51,11 +51,13 @@ $product = $viewModel->getProduct();
             <h2>$<?= $product->getPrice(); ?></h2>
 
             <div class="quantity-container">
-                <input type="number" class="product-quantity" min="1" max=<?= $product->getQuantity(); ?> value="1"
-                    data-product-id="<?= $product->getId(); ?>" />
-                <button class="buy-btn add-to-cart-btn" data-product-id="<?= $product->getId(); ?>">
-                    Add to Cart
-                </button>
+                <form id="add-product-form">
+                    <input type="hidden" name="productId" value=<?= $product->getId(); ?> />
+                    <input type="number" name="productQuantity" min="1" max=<?= $product->getQuantity(); ?> value="1" />
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Add to Cart
+                    </button>
+                </form>
             </div>
 
 

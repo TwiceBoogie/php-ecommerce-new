@@ -77,6 +77,45 @@ class Database extends PDO
     }
 
     /**
+     * Insert data in bulk
+     * @param string $table Table name.
+     * @param array  $rows  Array of associative arrays
+     * @return void
+     * @throws PDOException
+     */
+    public function bulkInsert(string $table, array $rows): void
+    {
+        if (empty($rows)) {
+            return;
+        }
+
+        $columns = array_keys($rows);
+        $columnsList = "`" . implode("`, ", $columns) . "`";
+
+        $placeholders = [];
+        $bindings = [];
+
+        foreach ($rows as $i => $row) {
+            $rowPlaceholders = [];
+
+            foreach ($columns as $col) {
+                $key = "{$col}_{$i}";
+                $rowPlaceholders[] = ":{$key}";
+                $bindings[":{$key}"] = $row[$col];
+            }
+            $placeholders[] = "(" . implode(", ", $rowPlaceholders) . ")";
+        }
+        $sql = "INSERT INTO `$table` ($columnsList) VALUES " . implode(", ", $placeholders);
+        $sth = $this->prepare($sql);
+
+        foreach ($bindings as $key => $value) {
+            $sth->bindValue($key, $value);
+        }
+
+        $sth->execute();
+    }
+
+    /**
      * Updates records in a table.
      *
      * @param string $table       Table name.

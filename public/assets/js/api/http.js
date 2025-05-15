@@ -20,7 +20,6 @@ export const Http = {
       });
 
       const data = await response.json();
-      console.log(response);
       if (!response.ok) {
         throw new ApiError(data, response.status);
       }

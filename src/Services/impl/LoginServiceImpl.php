@@ -4,9 +4,9 @@ namespace Sebastian\PhpEcommerce\Services\Impl;
 
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
 use Sebastian\PhpEcommerce\Http\Request\LoginRequest;
-use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\LoginRepository;
 use Sebastian\PhpEcommerce\Repository\UserRepository;
+use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Services\LoginService;
 use Sebastian\PhpEcommerce\Services\SecureSession;
 
@@ -14,16 +14,16 @@ class LoginServiceImpl implements LoginService
 {
     private LoginRepository $loginRepository;
     private UserRepository $userRepository;
-    private CartRepository $cartRepository;
+    private CartService $cartService;
 
     public function __construct(
         LoginRepository $loginRepository,
         UserRepository $userRepository,
-        CartRepository $cartRepository,
+        CartService $cartService,
     ) {
         $this->loginRepository = $loginRepository;
         $this->userRepository = $userRepository;
-        $this->cartRepository = $cartRepository;
+        $this->cartService = $cartService;
     }
 
     public function login(LoginRequest $request): ResponseDTO
@@ -60,6 +60,7 @@ class LoginServiceImpl implements LoginService
             }
         }
         // TODO: merge users cart from session id to user id
+        $this->cartService->getCart();
         // creds are valid so make new login entry
         $this->createUserSession($user[0]['id']);
         return new ResponseDTO(
@@ -83,11 +84,8 @@ class LoginServiceImpl implements LoginService
                 400
             );
         }
-        $cart = $this->cartRepository->getCart($userId, 'user_id');
+        // TODO: persist cart into db
         SecureSession::destroySession();
-        if (count($cart) !== 0) {
-            $this->cartRepository->handleLogoutCart($userId, SecureSession::getSessionId());
-        }
         return new ResponseDTO(
             'success',
             'Successfully logged out',

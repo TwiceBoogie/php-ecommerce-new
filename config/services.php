@@ -140,8 +140,8 @@ $container[LoginRepository::class] = function ($c) {
 $container[LoginService::class] = function ($c) {
     $loginRepo = $c[LoginRepository::class];
     $userRepo = $c[UserRepository::class];
-    $cartRepo = $c[CartRepository::class];
-    return new LoginServiceImpl($loginRepo, $userRepo, $cartRepo);
+    $cartService = $c[CartService::class];
+    return new LoginServiceImpl($loginRepo, $userRepo, $cartService);
 };
 
 $container[LoginController::class] = function ($c) {

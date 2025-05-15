@@ -4,10 +4,19 @@ namespace Sebastian\PhpEcommerce\Mapper;
 
 abstract class BaseMapper
 {
+    /**
+     * Dynamically instantiating a DTO class by examining its constructor and
+     * mapping associative array to constructor arguements
+     * @param array $data
+     * @param string $dtoClass
+     * @throws \InvalidArgumentException
+     * @return object|null
+     */
     protected function mapArrayToDTO(array $data, string $dtoClass)
     {
-        // Get the DTO constructor
+        // reports information about the $dtoClass
         $reflection = new \ReflectionClass($dtoClass);
+        // Get the DTO constructor
         $constructor = $reflection->getConstructor();
 
         if (!$constructor) {
@@ -43,7 +52,7 @@ abstract class BaseMapper
         return $reflection->newInstanceArgs($args);
     }
 
-    public function mapArrayToDTOArray(array $data, string $dtoClass): array
+    protected function mapArrayToDTOArray(array $data, string $dtoClass): array
     {
         return array_map(fn($item) => $this->mapArrayToDTO($item, $dtoClass), $data);
     }

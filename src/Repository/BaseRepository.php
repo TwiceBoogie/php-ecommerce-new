@@ -35,10 +35,18 @@ abstract class BaseRepository
         $this->table = $table;
     }
 
-    public function findBy(string $column, mixed $value)
+    public function findBy(array $column): array
     {
-        $sql = "SELECT * FROM `$this->table` WHERE `$column` = :value";
-        return $this->db->select($sql, ['value' => $value]);
+        $sql = "SELECT * FROM `$this->table` WHERE ";
+        $placeholders = [];
+        $bindings = [];
+        foreach ($column as $col => $value) {
+            $placeholders[] = "`$col` = :$col";
+            $bindings[$col] = $value;
+        }
+        $sql .= implode(" AND ", $placeholders);
+        $result = $this->db->select($sql, $bindings);
+        return !empty($result) ? $result : [];
     }
 
     /**
@@ -67,6 +75,40 @@ abstract class BaseRepository
         $sql = "SELECT * FROM `$this->table` WHERE id = :id";
         $result = $this->db->select($sql, ['id' => $id]);
         return $result[0] ?? null;
+    }
+
+    public function findIdBy(array $conditions): int
+    {
+        $sql = "SELECT `id` FROM `$this->table` WHERE ";
+        $placeholders = [];
+        $bindings = [];
+        foreach ($conditions as $col => $value) {
+            $placeholders[] = "`$col` = :$col";
+            $bindings[$col] = $value;
+        }
+        $sql .= implode(" AND ", $placeholders) . " LIMIT 1";
+        $result = $this->db->select($sql, $bindings);
+        return $result[0]['id'] ?? 0;
+    }
+
+    /**
+     * Check if records exists by a column and value
+     * 
+     * @param array    $column Array ['column' => value]
+     * @return bool            True if record exist, false otherwise
+     */
+    public function exists(array $column): bool
+    {
+        $sql = "SELECT 1 From `$this->table` WHERE ";
+        $placeholders = [];
+        $bindings = [];
+        foreach ($column as $col => $value) {
+            $placeholders[] = "`$col` = :$col";
+            $bindings[$col] = $value;
+        }
+        $sql .= implode(" AND ", $placeholders) . " LIMIT 1";
+        $result = $this->db->select($sql, $bindings);
+        return !empty($result);
     }
 
     /**

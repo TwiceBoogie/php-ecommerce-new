@@ -60,6 +60,7 @@ class Router
         $this->register('/login', LoginController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/register', RegisterController::class, 'index', ['GET'], [RedirectIfAuthMiddleware::class]);
         $this->register('/account', AccountController::class, 'index', ['GET'], [AuthMiddleware::class]);
+        $this->register('/cart', CartController::class, 'index', ['GET']);
 
         $this->register('/api/v1/cart', CartController::class, 'index', ['GET']);
         $this->register('/api/v1/cart/add', CartController::class, 'add', ['POST']);

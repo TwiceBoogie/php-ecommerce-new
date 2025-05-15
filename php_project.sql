@@ -11,41 +11,41 @@ SET time_zone = "+00:00";
 ;
 /*!40101 SET NAMES utf8mb4 */
 ;
--- Create table for Admins
-CREATE TABLE admin (
+-- Create table IF NOT EXISTS for Admins
+CREATE TABLE IF NOT EXISTS admin (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    admin_name VARCHAR(100) NOT NULL,
-    admin_email VARCHAR(40) NOT NULL UNIQUE,
-    admin_password VARCHAR(250) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    password VARCHAR(250) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Roles
-CREATE TABLE roles (
+-- Create table IF NOT EXISTS for Roles
+CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    role_name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 -- Insert default roles
-INSERT INTO roles (role_name)
+INSERT INTO roles (name)
 VALUES ('ADMIN'),
     ('USER');
--- Create table for Users
-CREATE TABLE users (
+-- Create table IF NOT EXISTS for Users
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_name VARCHAR(100) NOT NULL,
-    user_email VARCHAR(40) NOT NULL UNIQUE,
-    user_password VARCHAR(250) NOT NULL,
-    user_role INT NOT NULL DEFAULT 2,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    password VARCHAR(250) NOT NULL,
+    role INT NOT NULL DEFAULT 2,
     confirmed ENUM('Y', 'N') NOT NULL DEFAULT 'N',
     register_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_role) REFERENCES roles(id) ON DELETE
+    FOREIGN KEY (role) REFERENCES roles(id) ON DELETE
     SET DEFAULT
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for User Details
-CREATE TABLE user_details (
+-- Create table IF NOT EXISTS for User Details
+CREATE TABLE IF NOT EXISTS user_details (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     phone VARCHAR(30),
@@ -56,7 +56,7 @@ CREATE TABLE user_details (
     country VARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-CREATE TABLE login_attempts (
+CREATE TABLE IF NOT EXISTS login_attempts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
     -- Null if email doesn't exist in DB
@@ -72,7 +72,7 @@ CREATE TABLE login_attempts (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE
     SET NULL
 );
-CREATE TABLE user_sessions (
+CREATE TABLE IF NOT EXISTS user_sessions (
     id CHAR(36) PRIMARY KEY,
     -- UUID for session ID
     user_id INT NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE user_sessions (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE TABLE password_resets (
+CREATE TABLE IF NOT EXISTS password_resets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     token VARCHAR(255) NOT NULL UNIQUE,
@@ -92,20 +92,20 @@ CREATE TABLE password_resets (
     -- Expiry time for security
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
--- Create table for Products
-CREATE TABLE products (
+-- Create table IF NOT EXISTS for Products
+CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    product_name VARCHAR(100) NOT NULL,
-    product_category VARCHAR(100) NOT NULL,
-    product_description TEXT NOT NULL,
-    product_price DECIMAL(10, 2) NOT NULL,
-    product_color VARCHAR(100),
+    name VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    color VARCHAR(100),
     stock_quantity INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Product Images
-CREATE TABLE product_images (
+-- Create table IF NOT EXISTS for Product Images
+CREATE TABLE IF NOT EXISTS product_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
@@ -113,31 +113,31 @@ CREATE TABLE product_images (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Orders
-CREATE TABLE orders (
+-- Create table IF NOT EXISTS for Orders
+CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    order_cost DECIMAL(10, 2) NOT NULL,
-    order_status ENUM('pending', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
-    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cost DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Order Items
-CREATE TABLE order_items (
+-- Create table IF NOT EXISTS for Order Items
+CREATE TABLE IF NOT EXISTS order_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     product_id INT NOT NULL,
-    product_price DECIMAL(10, 2) NOT NULL,
-    product_quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    quantity INT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Carts (Persistent Cart)
-CREATE TABLE cart_items (
+-- Create table IF NOT EXISTS for Carts (Persistent Cart)
+CREATE TABLE IF NOT EXISTS cart_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id VARCHAR(255),
     -- For guests, linked to PHP session ID
-    user_id INT,
+    user_id INT NOT NULL,
     -- For authenticated users, linked to the `users` table
     product_id INT NOT NULL,
     quantity INT NOT NULL,
@@ -146,18 +146,19 @@ CREATE TABLE cart_items (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
--- Create table for Payments
-CREATE TABLE payments (
+-- Create table IF NOT EXISTS for Payments
+CREATE TABLE IF NOT EXISTS payments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
     payment_method ENUM('credit_card', 'paypal', 'bank_transfer') NOT NULL,
     payment_status ENUM('pending', 'completed', 'failed') NOT NULL DEFAULT 'pending',
-    payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     amount DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Discounts
-CREATE TABLE discounts (
+-- Create table IF NOT EXISTS for Discounts
+CREATE TABLE IF NOT EXISTS discounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT,
     discount_percentage DECIMAL(5, 2) NOT NULL,
@@ -166,8 +167,8 @@ CREATE TABLE discounts (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Coupons
-CREATE TABLE coupons (
+-- Create table IF NOT EXISTS for Coupons
+CREATE TABLE IF NOT EXISTS coupons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(50) NOT NULL UNIQUE,
     discount_percentage DECIMAL(5, 2) NOT NULL,
@@ -177,8 +178,8 @@ CREATE TABLE coupons (
     valid_to DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for Product Reviews
-CREATE TABLE product_reviews (
+-- Create table IF NOT EXISTS for Product Reviews
+CREATE TABLE IF NOT EXISTS product_reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -190,8 +191,8 @@ CREATE TABLE product_reviews (
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
--- Create table for API Logs
-CREATE TABLE api_logs (
+-- Create table IF NOT EXISTS for API Logs
+CREATE TABLE IF NOT EXISTS api_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     endpoint VARCHAR(255),
@@ -209,18 +210,18 @@ CREATE TABLE api_logs (
 -- END;
 -- // DELIMITER;
 -- Create Indexes for optimization
-CREATE INDEX idx_product_category ON products(product_category);
-CREATE INDEX idx_order_date ON orders(order_date);
-CREATE INDEX idx_user_email ON users(user_email);
+CREATE INDEX idx_product_category ON products(category);
+CREATE INDEX idx_order_date ON orders(created_at);
+CREATE INDEX idx_user_email ON users(email);
 CREATE INDEX idx_product_reviews ON product_reviews(product_id, user_id);
 CREATE INDEX idx_cart_items ON cart_items(user_id, product_id);
-CREATE INDEX idx_session_id ON cart_items(session_id);
+CREATE INDEX idx_product_images_product_id ON product_images(product_id);
 INSERT INTO `products` (
-        `product_name`,
-        `product_category`,
-        `product_description`,
-        `product_price`,
-        `product_color`,
+        `name`,
+        `category`,
+        `description`,
+        `price`,
+        `color`,
         `stock_quantity`
     )
 VALUES (

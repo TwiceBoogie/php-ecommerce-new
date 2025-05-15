@@ -3,8 +3,11 @@
 namespace Sebastian\PhpEcommerce\Controllers;
 
 use Sebastian\PhpEcommerce\Http\Request;
+use Sebastian\PhpEcommerce\Http\Request\AddToCartRequest;
 use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Services\Response;
+use Sebastian\PhpEcommerce\Views\Models\CartViewModel;
+use Sebastian\PhpEcommerce\Views\View;
 
 class CartController
 {
@@ -17,28 +20,20 @@ class CartController
 
     public function index(Request $request)
     {
-        $cart = $_SESSION['cart'] ?? [];
-        return Response::send(['cart' => $cart], 200);
+        $cart = $this->cartService->getCart();
+        $isAdmin = $request->isAdmin();
+        $isAuthenticated = $request->isAuthenticated();
+        $cart = $this->cartService->getCart();
+        $cartViewModel = new CartViewModel($isAdmin, $isAuthenticated, $cart);
+        return View::render('cart.index', [
+            'viewModel' => $cartViewModel
+        ]);
     }
 
     public function add(Request $request)
     {
-        $input = file_get_contents('php://input');
-        $decodedInput = json_decode($input, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return Response::send(['error' => 'Invalid JSON input'], 400);
-        }
-
-        $product_id = $decodedInput['product_id'] ?? null;
-        $quantity = $decodedInput['product_quantity'] ?? 1;
-
-        if (!$product_id) {
-            return Response::send(['error' => 'Product ID is required'], 400);
-        }
-
-        $this->cartService->addToCart($product_id, $quantity);
-
+        $addToCartRequest = new AddToCartRequest($request->getBody());
+        $response = $this->cartService->addToCart($addToCartRequest);
         return Response::send([
             'message' => 'Product added to cart',
         ], 200);

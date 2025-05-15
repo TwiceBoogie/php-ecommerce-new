@@ -1,6 +1,6 @@
 import $ from "jquery";
-import Util from "@utils/utils.js";
-import Http from "@api/http.js";
+import { Util } from "../utils/index.js";
+import { Http } from "../api/http.js";
 
 const Cart = {
   /**
@@ -14,61 +14,51 @@ const Cart = {
    * Attach event listener to all "Add to Cart" buttons.
    */
   attachEventListeners: function () {
-    $(".add-to-cart-btn").on("click", async function (event) {
-      event.preventDefault();
-
-      const button = $(this);
-
-      // Get product ID from button data attribute
-      const productId = button.data("product-id");
-
-      // Find the corresponding quantity input field
-      const quantityInput = $(
-        `.product-quantity[data-product-id="${productId}"]`
-      );
-
-      // Get the quantity or default to 1
-      const quantity =
-        quantityInput.length && quantityInput.val()
-          ? parseInt(quantityInput.val(), 10)
-          : 1;
-
-      // Call Cart.addToCart with product ID and quantity
-      await Cart.addToCart(productId, quantity);
+    const self = this;
+    $("#add-product-form").validate({
+      rules: {
+        productId: {
+          required: true,
+          number: true,
+          digits: true,
+          min: 1,
+        },
+        productQuantity: {
+          required: true,
+          number: true,
+          digits: true,
+          min: 1,
+        },
+      },
+      messages: {
+        productQuantity: {
+          required: "quantity must be 1 or greater",
+          min: "Quantity must be 1 or greater",
+        },
+      },
+      submitHandler: function (form) {
+        self.submit(form);
+      },
     });
   },
-  /**
-   * Add an item to the cart.
-   * @param {number} productId - The ID of the product to add to the cart.
-   * @param {number} quantity - The quantity of the product to add.
-   */
-  addToCart: async function (productId, quantity) {
+
+  submit: async function (form) {
+    Util.removeErrorMessages();
     try {
-      const response = await Http.post("/api/v1/cart/add", {
-        product_id: productId,
-        quantity: quantity,
-      });
+      const formData = this.getAddProductFormData(form);
 
-      // TODO: update the max quantity value
-
-      // Update the cart count in the UI
-      // this.updateCartUI(response.cart_count);
-
-      // // Show success message in a modal
-      // HelpModules.Util.displaySuccessMessage(
-      //   "Item Added to Cart",
-      //   "The product has been successfully added to your cart!",
-      //   "/checkout"
-      // );
+      const response = Http.post("/api/v1/cart/add", formData);
+      Util.displaySuccessMessage("Product added to cart", response.message);
     } catch (error) {
-      console.error("Error adding to cart:", error);
-
-      // Show error message in a modal
-      Util.displayErrorMessage(
-        "Error Adding to Cart",
-        error.message || "Failed to add the item to the cart. Please try again."
-      );
+      console.error("Add Product Error: ", error);
     }
+  },
+
+  getAddProductFormData: function (form) {
+    return {
+      productId: form["productId"].value,
+      productQuantity: form["productQuantity"].value,
+    };
   },
 
   /**

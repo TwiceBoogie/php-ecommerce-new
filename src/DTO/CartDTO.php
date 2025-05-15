@@ -4,18 +4,18 @@ namespace Sebastian\PhpEcommerce\DTO;
 
 class CartDTO
 {
-    private string $id;
+    private int $id;
     private ProductDTO $product;
     private int $quantity;
 
-    public function __construct(string $id, ProductDTO $product, int $quantity)
+    public function __construct(int $id, ProductDTO $product, int $quantity)
     {
         $this->id = $id;
         $this->product = $product;
         $this->quantity = $quantity;
     }
 
-    public function getId(): string
+    public function getId(): int
     {
         return $this->id;
     }

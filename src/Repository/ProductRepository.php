@@ -29,11 +29,30 @@ class ProductRepository extends BaseRepository
      */
     public function getAll(): array
     {
-        $sql = "SELECT p.id, p.product_name, p.product_price, p.product_category,
+        $sql = "SELECT p.id, p.name, p.price, p.category,
                 pi.image_url AS main_image
                 FROM products p
                 LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1";
         return $this->db->select($sql);
+    }
+
+    public function getMainImageByProductIds(array $productIds): array
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+        $placeholders = [];
+        $bindings = [];
+
+        foreach ($productIds as $id) {
+            $placeholders[] = ":product_$id";
+            $bindings["product_$id"] = $id;
+        }
+        $sql = "SELECT `product_id` AS `productId`, `image_url`
+                FROM `product_images`
+                WHERE `is_main` = 1 AND `product_id` IN (" . implode(", ", $placeholders) . ")";
+        $result = $this->db->select($sql, $bindings);
+        return empty($result) ? [] : $result;
     }
 
     /**
@@ -45,11 +64,11 @@ class ProductRepository extends BaseRepository
      */
     public function getProductsByCategory(string $category, ?int $limit = null): array
     {
-        $sql = "SELECT p.id, p.product_name, p.product_price, p.product_category, 
+        $sql = "SELECT p.id, p.name, p.price, p.category, 
                 pi.image_url AS main_image
                 FROM products p
                 LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
-                WHERE p.product_category = :category";
+                WHERE p.category = :category";
         if ($limit !== null) {
             $sql .= " LIMIT " . (int) $limit;
         }
@@ -60,31 +79,51 @@ class ProductRepository extends BaseRepository
      * Retrieves a product by its ID along with detailed information and images.
      *
      * @param int $productId The product ID.
-     * @return array         The product details.
+     * @return array         The product details with images.
      * @throws Exception     If the product is not found.
      */
     public function getProductById(int $productId): array
     {
-        $sql = "SELECT p.id, p.product_name, p.product_price, p.product_category, p.product_description, 
-                p.stock_quantity,
-                pi.image_url AS main_image
-                FROM products p
-                LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
-                WHERE p.id = :id";
-        $result = $this->db->select($sql, ['id' => $productId]);
+        $products = $this->getProductByIds([$productId]);
+        return $products;
+    }
 
-        if (empty($result)) {
-            throw new Exception("Product not found");
+    public function getProductByIds(array $productIds): array
+    {
+        $placeholders = [];
+        $bindings = [];
+        foreach ($productIds as $id) {
+            $placeholders[] = ":product_$id";
+            $bindings["product_$id"] = $id;
         }
-
-        // Retrieve all images associated with the product.
-        $images = $this->db->select(
-            "SELECT `image_url` FROM `product_images` WHERE `product_id` = :id",
-            ['id' => $productId]
-        );
-        $result[0]['images'] = array_column($images, 'image_url');
-
-        return $result[0];
+        $sql = "SELECT
+                    p.id,
+                    p.name,
+                    p.price,
+                    p.category,
+                    p.description,
+                    p.stock_quantity,
+                    -- Subquery to get main image
+                    (
+                        SELECT pi.image_url
+                        FROM `product_images` pi
+                        WHERE pi.product_id = p.id AND pi.is_main = 1
+                        LIMIT 1
+                    ) AS main_image,
+                    -- subquery to get th rest of the images (excluding is_main)
+                    (
+                        SELECT JSON_ARRAYAGG(pi2.image_url)
+                        FROM `product_images` pi2
+                        WHERE pi2.product_id = p.id AND (pi2.is_main = 0)
+                    ) AS images
+                FROM `products` p
+                WHERE p.id IN (" . implode(", ", $placeholders) . ")";
+        $result = $this->db->select($sql, $bindings);
+        // decode the json array of images since its a string
+        foreach ($result as &$row) {
+            $row['images'] = json_decode($row['images'], true) ?? [];
+        }
+        return $result;
     }
 
     /**

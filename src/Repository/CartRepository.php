@@ -11,14 +11,9 @@ class CartRepository extends BaseRepository
         parent::__construct($db, 'cart_items');
     }
 
-    public function getCartBySessionId(string $sessionId)
+    public function getCartByUserId(string $userId): array
     {
-        return $this->findBy('session_id', $sessionId);
-    }
-
-    public function getCart(string $identifier, string $column)
-    {
-        return $this->findBy($column, $identifier);
+        return $this->findBy(['user_id' => $userId]);
     }
 
     public function insertItemIntoCart(string $identifier, string $column, int $productId, int $quantity)
@@ -28,16 +23,6 @@ class CartRepository extends BaseRepository
             'product_id' => $productId,
             'quantity' => $quantity
         ]);
-    }
-
-    public function handleLogoutCart(int $userId, string $sessionId)
-    {
-        $this->db->update(
-            'cart_items',
-            ['user_id' => null, 'session_id' => $sessionId],
-            'user_id = :user_id',
-            ['user_id' => $userId]
-        );
     }
 
     public function updateCartItemQuantity(string $identifier, string $column, int $productId, int $quantity)
