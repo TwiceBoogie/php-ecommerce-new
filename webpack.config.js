@@ -8,8 +8,19 @@ const __dirname = path.dirname(__filename);
 export default {
   entry: {
     main: "./public/assets/js/main.js",
-    vendor: ["jquery", "jquery-validation"],
   },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendor",
+          chunks: "all",
+        },
+      },
+    },
+  },
+
   output: {
     filename: "[name].bundle.js",
     path: path.resolve(process.cwd(), "public/dist"),

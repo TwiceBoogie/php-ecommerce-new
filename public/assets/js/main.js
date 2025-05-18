@@ -9,7 +9,10 @@ $(function () {
   Cart.init();
   Login.init();
   if ($("orders-list").length) {
-    import("@modules/orders.js")
+    import(
+      /* webpackChunkName: "orders" */
+      "@modules/orders.js"
+    )
       .then(({ default: Orders }) => {
         Orders.init();
       })

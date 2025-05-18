@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS admin (
 CREATE TABLE IF NOT EXISTS roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
+    protected BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
@@ -82,16 +83,16 @@ CREATE TABLE IF NOT EXISTS user_sessions (
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS password_resets (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    token VARCHAR(255) NOT NULL UNIQUE,
-    -- Random reset token
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL,
-    -- Expiry time for security
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+-- CREATE TABLE IF NOT EXISTS password_resets (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT NOT NULL,
+--     token VARCHAR(255) NOT NULL UNIQUE,
+--     -- Random reset token
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     expires_at TIMESTAMP NOT NULL,
+--     -- Expiry time for security
+--     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+-- );
 -- Create table IF NOT EXISTS for Products
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -133,17 +134,27 @@ CREATE TABLE IF NOT EXISTS order_items (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+CREATE TABLE IF NOT EXISTS carts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    total_amount  decimal(10, 2) DEFAULT 0,
+    total_quantity INT DEFAULT 0,
+    status ENUM('active', 'abandoned', 'converted') DEFAULT 'active',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 -- Create table IF NOT EXISTS for Carts (Persistent Cart)
 CREATE TABLE IF NOT EXISTS cart_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     -- For guests, linked to PHP session ID
-    user_id INT NOT NULL,
+    cart_id INT NOT NULL,
     -- For authenticated users, linked to the `users` table
     product_id INT NOT NULL,
     quantity INT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 -- Create table IF NOT EXISTS for Payments
@@ -214,7 +225,7 @@ CREATE INDEX idx_product_category ON products(category);
 CREATE INDEX idx_order_date ON orders(created_at);
 CREATE INDEX idx_user_email ON users(email);
 CREATE INDEX idx_product_reviews ON product_reviews(product_id, user_id);
-CREATE INDEX idx_cart_items ON cart_items(user_id, product_id);
+-- CREATE INDEX idx_cart_items ON cart_items(user_id, product_id);
 CREATE INDEX idx_product_images_product_id ON product_images(product_id);
 INSERT INTO `products` (
         `name`,

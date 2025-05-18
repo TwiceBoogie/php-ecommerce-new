@@ -146,13 +146,13 @@ class Router
     {
         // reverse array bcs array_reduce() builds chain from last to first
         $stack = array_reverse($middlewares);
-
+        // array_reduce(array, function ('initial', 'middleware from stack'), 'initial or the anonymous function we pass');
         $middlewareChain = array_reduce($stack, function ($next, $middleware) {
             return function (Request $request) use ($middleware, $next) {
                 $middlewareInstance = $this->container[$middleware];
                 return $middlewareInstance->handle($request, $next);
             };
-        }, function (Request $request) use ($next) { // fallback or 'final' callable if $stack is empty which skipps the callback
+        }, function (Request $request) use ($next) { // initial
             return $next($request);
         });
 

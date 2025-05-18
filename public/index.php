@@ -3,9 +3,16 @@
 // Load the autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Sebastian\PhpEcommerce\Middleware\InjectAuthContextMiddleware;
+use Sebastian\PhpEcommerce\Routing\Router;
+
 // Bootstrap the application
-$config = require_once __DIR__ . '/../bootstrap/app.php';
+$container = require_once __DIR__ . '/../bootstrap/app.php';
+
+$router = $container[Router::class];
+$router->loadCachedRoutes();
 // Load routes
+$router->addGlobalMiddlewares(InjectAuthContextMiddleware::class);
 require_once __DIR__ . '/../src/Helpers/HelperFunctions.php';
 
 // Get the current path and method

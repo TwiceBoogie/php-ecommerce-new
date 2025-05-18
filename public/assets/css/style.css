@@ -51,6 +51,22 @@ h6 {
   color: #d8d8d8;
 }
 
+.btn-delete-soft {
+  color: #dc3545;
+  background-color: transparent;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.btn-delete-soft:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.dropdown-menu-tight {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .btn-main {
   font-size: 0.8rem;
   font-weight: 900;

@@ -5,6 +5,7 @@ namespace Sebastian\PhpEcommerce\Services\Impl;
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
 use Sebastian\PhpEcommerce\Http\Request\AddToCartRequest;
 use Sebastian\PhpEcommerce\Mapper\CartMapper;
+use Sebastian\PhpEcommerce\Repository\CartItemRepository;
 use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\ProductRepository;
@@ -13,20 +14,34 @@ use Sebastian\PhpEcommerce\Services\SecureSession;
 /**
  * Session Cart Format:
  * [
- *     product_id => quantity,
- *     4 => 19, // means product ID 4 with quantity 19
+ *     'cartId' => id,
+ *     'items' => [
+ *          [
+ *          'id' => id,
+ *          'productId' => id,
+ *          'quantity' => quantity,
+ *          ]
+ *      ],
+ *     'totalAmount' => amount,
+ *     'totalCound' => total
  * ]
  */
 class CartServiceImpl implements CartService
 {
     private CartRepository $cartRepository;
+    private CartItemRepository $cartItemRepository;
     private ProductRepository $productRepository;
     private CartMapper $mapper;
 
-    public function __construct(CartRepository $cartRepository, ProductRepository $productRepository, CartMapper $mapper)
-    {
+    public function __construct(
+        CartRepository $cartRepository,
+        ProductRepository $productRepository,
+        CartItemRepository $cartItemRepository,
+        CartMapper $mapper
+    ) {
         $this->cartRepository = $cartRepository;
         $this->productRepository = $productRepository;
+        $this->cartItemRepository = $cartItemRepository;
         $this->mapper = $mapper;
     }
 
@@ -54,15 +69,26 @@ class CartServiceImpl implements CartService
 
         $user = SecureSession::get('user');
         $userId = $user['id'] ?? null;
-        $sessionCart = $user['cart'] ?? [];
+        $sessionCart = $user['cart'] ?? [
+            'id' => 0,
+            'items' => [],
+            'totalAmount' => 0,
+            'totalQuantity' => 0
+        ];
 
         $productId = $request->getProductId();
         $quantity = $request->getProductQuantity();
 
-        $sessionCart = $this->addToCartItem($sessionCart, $productId, $quantity);
+        $newQuantity = 0;
+        foreach ($sessionCart['items'] as $item) {
+            if ($item['productId'] === $productId) {
+                $newQuantity = $item['quantity'] + $quantity;
+                break;
+            }
+        }
 
         // check stock
-        if (!$this->productRepository->productStockAvailable($productId, $sessionCart[$productId])) {
+        if (!$this->productRepository->productStockAvailable($productId, $newQuantity)) {
             return new ResponseDTO(
                 "error",
                 "Product out of stock",
@@ -72,6 +98,7 @@ class CartServiceImpl implements CartService
             );
         }
 
+        $sessionCart = $this->addToCartItem($sessionCart, $productId, $quantity);
         SecureSession::set('user', ['cart' => $sessionCart]);
         if (!$userId) {
             return new ResponseDTO(
@@ -82,20 +109,9 @@ class CartServiceImpl implements CartService
                 200
             );
         }
-        // retrieve cart using userId and productId
-        $cartId = $this->cartRepository->findIdBy([
-            'user_id' => $userId,
-            'product_id' => $productId
-        ]);
-        $dataToAdd = $cartId ? [
-            'id' => $cartId,
-            'quantity' => $sessionCart[$productId]
-        ] : [
-            'user_id' => $userId,
-            'product_id' => $productId,
-            'quantity' => $sessionCart[$productId]
-        ];
-        $this->cartRepository->save($dataToAdd);
+        // if productId exist then cartItemId exist as well
+
+        // if cartItemId does not exist then create a new entry
         return new ResponseDTO(
             "success",
             "Product added to cart",
@@ -174,7 +190,23 @@ class CartServiceImpl implements CartService
 
     private function addToCartItem(array $cart, int $productId, int $qtyToAdd): array
     {
-        $cart[$productId] = ($cart[$productId] ?? 0) + $qtyToAdd;
+        $found = false;
+        foreach ($cart['items'] as &$item) {
+            if ($item['productId'] === $productId) {
+                $item['quantity'] += $qtyToAdd;
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            $cart['items'][] = [
+                'productId' => $productId,
+                'quantity' => $qtyToAdd,
+            ];
+        }
+        $cart['totalQuantity'] += $qtyToAdd;
+
         return $cart;
     }
 }

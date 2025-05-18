@@ -8,3 +8,14 @@ services:
       - ./php_project.sql:/docker-entrypoint-initdb.d/php_project.sql
     ports:
       - "3306:3306"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    restart: unless-stopped

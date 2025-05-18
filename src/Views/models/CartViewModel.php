@@ -17,6 +17,9 @@ class CartViewModel extends BaseViewModel
         $this->cartDTO = $cartDTO;
     }
 
+    /**
+     * @return CartDTO[]
+     */
     public function getCart(): array
     {
         return $this->cartDTO;
