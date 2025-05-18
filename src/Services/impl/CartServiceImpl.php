@@ -17,7 +17,7 @@ use Sebastian\PhpEcommerce\Services\SecureSession;
  *     'cartId' => id,
  *     'items' => [
  *          [
- *          'id' => id,
+ *          'id' => id, // cartItemId
  *          'productId' => id,
  *          'quantity' => quantity,
  *          ]
