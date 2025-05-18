@@ -1,11 +1,33 @@
 <?php
 
-use Sebastian\PhpEcommerce\Middleware\InjectAuthContextMiddleware;
-use Sebastian\PhpEcommerce\Routing\Router;
-use Sebastian\PhpEcommerce\Services\Container;
+
+use Pimple\Container;
+
+use Sebastian\PhpEcommerce\Providers\{
+    CoreServiceProvider,
+    AuthServiceProvider,
+    CartServiceProvider,
+    ShopServiceProvider,
+    OrderServiceProvider,
+    HomeServiceProvider,
+    ContactServiceProvider,
+    MiddlewareServiceProvider
+};
 use Sebastian\PhpEcommerce\Services\SecureSession;
 
-$container = require __DIR__ . '/../config/services.php';
+// Lazy-loading services by using closures.
+// while the container is re-instantiated,
+// services are only instantiated when accessed
+$container = new Container();
+
+$container->register(new CoreServiceProvider());
+$container->register(new AuthServiceProvider());
+$container->register(new CartServiceProvider());
+$container->register(new ShopServiceProvider());
+$container->register(new OrderServiceProvider());
+$container->register(new HomeServiceProvider());
+$container->register(new ContactServiceProvider());
+$container->register(new MiddlewareServiceProvider());
 // Load configuration
 $config = $container['config'];
 
@@ -25,8 +47,4 @@ ini_set('error_log', __DIR__ . '/../storage/logs/php_errors.log');
 // Start the session using SecureSession
 SecureSession::startSession($config);
 
-Container::setContainer($container);
-
-$router = new Router($container);
-$router->loadCachedRoutes();
-$router->addGlobalMiddlewares(InjectAuthContextMiddleware::class);
+return $container;
