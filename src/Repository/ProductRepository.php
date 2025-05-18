@@ -85,7 +85,7 @@ class ProductRepository extends BaseRepository
     public function getProductById(int $productId): array
     {
         $products = $this->getProductByIds([$productId]);
-        return $products;
+        return $products[0] ?? [];
     }
 
     public function getProductByIds(array $productIds): array
@@ -136,7 +136,7 @@ class ProductRepository extends BaseRepository
      */
     public function productStockAvailable(int $productId, int $quantity): bool
     {
-        $sql = "SELECT id, stock_quantity,
+        $sql = "SELECT
                 CASE 
                     WHEN stock_quantity >= :quantity THEN 1
                     ELSE 0
@@ -150,80 +150,5 @@ class ProductRepository extends BaseRepository
         }
 
         return $result[0]['enough_stock'] == 1;
-    }
-
-    /**
-     * Updates the product's stock by subtracting the specified quantity.
-     *
-     * @param int $productId The product ID.
-     * @param int $quantity  The quantity to subtract.
-     * @return void
-     */
-    public function updateProductStock(int $productId, int $quantity): void
-    {
-        $sql = "UPDATE `products` 
-            SET `stock_quantity` = `stock_quantity` - :quantity 
-            WHERE `id` = :id";
-        $this->db->executeWithTransaction($sql, [
-            'quantity' => $quantity,
-            'id' => $productId
-        ]);
-    }
-
-    /**
-     * Updates stock and adds items to the cart in a transactional manner.
-     *
-     * @param int   $userId    The user ID.
-     * @param array $cartItems List of cart items, each with keys 'product_id' and 'quantity'.
-     * @return void
-     * @throws Exception If any operation fails.
-     */
-    public function updateStock(int $userId, array $cartItems): void
-    {
-        $this->db->beginTransaction(); // Start transaction
-
-        try {
-            foreach ($cartItems as $item) {
-                $productId = $item['product_id'];
-                $quantity = $item['quantity'];
-
-                // Step 1: Check if the product exists and has enough stock.
-                $sql = "SELECT id, stock_quantity,
-                        CASE 
-                            WHEN stock_quantity >= :quantity THEN 1
-                            ELSE 0
-                        END as enough_stock
-                        FROM products
-                        WHERE id = :id";
-                $result = $this->db->select($sql, ['id' => $productId, 'quantity' => $quantity]);
-
-                if (empty($result)) {
-                    throw new Exception("Product ID {$productId} not found.");
-                }
-
-                if ($result[0]['enough_stock'] == 0) {
-                    throw new Exception("Not enough stock for product ID {$productId}. Available: {$result[0]['stock_quantity']}, Requested: {$quantity}");
-                }
-
-                // Step 2: Reduce stock quantity in products table.
-                $sqlUpdate = "UPDATE `products` SET `stock_quantity` = `stock_quantity` - :quantity WHERE `id` = :id";
-                $this->db->executeWithTransaction($sqlUpdate, [
-                    'quantity' => $quantity,
-                    'id' => $productId
-                ]);
-
-                // Step 3: Insert into cart_items table.
-                $this->db->insert('cart_items', [
-                    'user_id' => $userId,
-                    'product_id' => $productId,
-                    'quantity' => $quantity
-                ]);
-            }
-
-            $this->db->commit(); // Commit transaction
-        } catch (Exception $e) {
-            $this->db->rollBack(); // Roll back if any failure occurs
-            throw $e;
-        }
     }
 }

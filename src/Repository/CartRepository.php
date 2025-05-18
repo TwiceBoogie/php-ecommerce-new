@@ -8,7 +8,7 @@ class CartRepository extends BaseRepository
 {
     public function __construct(Database $db)
     {
-        parent::__construct($db, 'cart_items');
+        parent::__construct($db, 'carts');
     }
 
     public function getCartByUserId(string $userId): array
