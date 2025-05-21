@@ -2,28 +2,30 @@
 
 namespace Sebastian\PhpEcommerce\Http\Request;
 
-class AddToCartRequest
+class CartRequest
 {
     private array $errors = [];
-    private ?int $productId = null;
-    private ?int $productQuantity = null;
+    private int $productId;
+    private int $productQuantity;
+    private string $operation;
 
     public function __construct(array $input)
     {
         $this->productId = (isset($input['productId']) && is_numeric($input['productId']))
-            ? (int) $input['productId'] : null;
+            ? (int) $input['productId'] : 0;
         $this->productQuantity = (isset($input['productQuantity']) && is_numeric($input['productQuantity']))
-            ? (int) $input['productQuantity'] : null;
+            ? (int) $input['productQuantity'] : 0;
+        $this->operation = in_array($input['operation'] ?? 'add', ['add', 'remove']) ? $input['operation'] : 'add';
 
         $this->validate();
     }
 
     private function validate(): void
     {
-        if ($this->productId === null || $this->productId <= 0) {
+        if ($this->productId <= 0) {
             $this->errors['productId'] = 'Valid product Id is required';
         }
-        if ($this->productQuantity === null || $this->productQuantity <= 0) {
+        if ($this->productQuantity <= 0) {
             $this->errors['productQuantity'] = 'Quantity must be at least 1';
         }
     }
@@ -46,5 +48,10 @@ class AddToCartRequest
     public function getProductQuantity(): ?int
     {
         return $this->productQuantity;
+    }
+
+    public function getOperation(): string
+    {
+        return $this->operation;
     }
 }

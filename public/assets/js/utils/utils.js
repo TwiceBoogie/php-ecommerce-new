@@ -8,9 +8,9 @@ export const Util = {
    * Display a success message in a modal.
    */
   displaySuccessMessage(title, message, redirectUrl = null) {
-    const modal = $("#exampleModal");
+    const $modal = $("#exampleModal");
 
-    if (!modal.length) {
+    if (!$modal.length) {
       console.error("Modal with ID 'exampleModal' not found.");
       return;
     }
@@ -22,7 +22,7 @@ export const Util = {
       .text("Close")
       .off("click")
       .on("click", () => {
-        modal.modal("hide");
+        $modal.hide();
       });
 
     const $primaryButton = $(".modal-footer .btn-primary").hide();
@@ -36,7 +36,7 @@ export const Util = {
         .show();
     }
 
-    modal.modal("show");
+    $modal.show();
   },
 
   /**
@@ -100,12 +100,31 @@ export const Util = {
 
   showToast(message, type = "success") {
     const $toast = $("#app-toast");
+    const $strong = $toast.find(".me-auto");
     const $body = $("#app-toast-body");
 
+    // clear any previous icon and insert a new one
+    $strong.empty();
+    const $icon = $("<i>").addClass("fa-solid me-2");
+    switch (type) {
+      case "success":
+        $icon.addClass("fa-check");
+        $strong.text("Success");
+        break;
+      case "info":
+      default:
+        $icon.addClass("fa-info-circle");
+        $strong.text("Notice");
+        break;
+    }
+
+    $strong.prepend($icon);
     $body.text(message);
     $toast
       .removeClass()
-      .addClass(`toast align-items-center text-bg-${type} border-0`);
+      .addClass(
+        `toast align-items-center bg-${type}-subtle text-${type} border-0`
+      );
     const toast = bootstrap.Toast.getOrCreateInstance($toast[0]);
     toast.show();
   },

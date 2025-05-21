@@ -34,12 +34,15 @@ $isAuthenticated = $viewModel->isAuthenticated();
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
         <div id="app-toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
             aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Warning</strong>
+                <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
             <div class="d-flex">
                 <div class="toast-body" id="app-toast-body">
                     <!-- Dynamic message goes here -->
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
             </div>
         </div>
     </div>

@@ -9,6 +9,8 @@ use Sebastian\PhpEcommerce\Repository\CartItemRepository;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\ProductRepository;
 use Sebastian\PhpEcommerce\Services\CartService;
+use Sebastian\PhpEcommerce\Services\CartItemService;
+use Sebastian\PhpEcommerce\Services\Impl\CartItemServiceImpl;
 use Sebastian\PhpEcommerce\Services\Impl\CartServiceImpl;
 
 class CartServiceProvider implements ServiceProviderInterface
@@ -20,11 +22,12 @@ class CartServiceProvider implements ServiceProviderInterface
         // $c[ProductRepository::class] = fn($c) => new ProductRepository($c['db']);
         $c[CartMapper::class] = fn($c) => new CartMapper();
 
+        $c[CartItemService::class] = fn($c) => new CartItemServiceImpl($c[CartItemRepository::class]);
         $c[CartService::class] = fn($c) =>
             new CartServiceImpl(
                 $c[CartRepository::class],
                 $c[ProductRepository::class],
-                $c[CartItemRepository::class],
+                $c[CartItemService::class],
                 $c[CartMapper::class]
             );
 

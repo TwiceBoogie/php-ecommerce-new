@@ -3,7 +3,6 @@
 namespace Sebastian\PhpEcommerce\Middleware;
 
 use Sebastian\PhpEcommerce\Http\Request;
-use Sebastian\PhpEcommerce\Services\SecureSession;
 
 class AuthMiddleware implements MiddlewareInterface
 {

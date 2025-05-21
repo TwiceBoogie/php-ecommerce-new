@@ -2,116 +2,118 @@
 
 namespace Sebastian\PhpEcommerce\Services\Impl;
 
+use Sebastian\PhpEcommerce\DTO\CartDTO;
 use Sebastian\PhpEcommerce\DTO\ResponseDTO;
-use Sebastian\PhpEcommerce\Http\Request\AddToCartRequest;
+use Sebastian\PhpEcommerce\Http\Request\CartRequest;
 use Sebastian\PhpEcommerce\Mapper\CartMapper;
-use Sebastian\PhpEcommerce\Repository\CartItemRepository;
+use Sebastian\PhpEcommerce\Services\CartItemService;
 use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Repository\CartRepository;
 use Sebastian\PhpEcommerce\Repository\ProductRepository;
+use Sebastian\PhpEcommerce\Services\ProductService;
 use Sebastian\PhpEcommerce\Services\SecureSession;
 
 /**
  * Session Cart Format:
  * [
- *     'cartId' => id,
+ *     'id' => cartId,
  *     'items' => [
- *          [
- *          'id' => id, // cartItemId
- *          'productId' => id,
- *          'quantity' => quantity,
- *          ]
- *      ],
+ *         [
+ *             'id' => cartItemId,
+ *             'productId' => id,
+ *             'quantity' => quantity,
+ *         ]
+ *     ],
  *     'totalAmount' => amount,
- *     'totalCound' => total
+ *     'totalQuantity' => total
+ * ]
+ *
+ * DTO Cart Format:
+ * [
+ *     'id' => ...,
+ *     'totalAmount' => ...,
+ *     'totalQuantity' => ...,
+ *     'items' => [
+ *         [
+ *             'id' => ...,
+ *             'quantity' => ...,
+ *             'product' => [
+ *                 'id' => ...,
+ *                 'name' => ...,
+ *                 'category' => ...,
+ *                 'price' => ...
+ *             ]
+ *         ]
+ *     ]
  * ]
  */
 class CartServiceImpl implements CartService
 {
     private CartRepository $cartRepository;
-    private CartItemRepository $cartItemRepository;
-    private ProductRepository $productRepository;
+    private CartItemService $cartItemService;
+    private ProductService $productService;
     private CartMapper $mapper;
 
     public function __construct(
         CartRepository $cartRepository,
-        ProductRepository $productRepository,
-        CartItemRepository $cartItemRepository,
+        ProductService $productService,
+        CartItemService $cartItemService,
         CartMapper $mapper
     ) {
         $this->cartRepository = $cartRepository;
-        $this->productRepository = $productRepository;
-        $this->cartItemRepository = $cartItemRepository;
+        $this->productService = $productService;
+        $this->cartItemService = $cartItemService;
         $this->mapper = $mapper;
     }
 
-    public function getCart(): array
+    public function getCart(): CartDTO
     {
-        $user = SecureSession::get('user');
-        $userId = $user['id'] ?? null;
-        $sessionCart = $user['cart'] ?? [];
+        $userId = SecureSession::get('userId');
+        $sessionCart = SecureSession::get('cart') ?? [
+            'id' => 0,
+            'items' => [],
+            'totalCost' => 0,
+            'totalQuantity' => 0
+        ];
         $cart = [];
-        if (!$userId && !empty($sessionCart)) {
+
+        if (!$userId && !empty($sessionCart['items'])) {
             $cart = $this->getGuestCart($sessionCart);
         }
         if ($userId) {
             $cart = $this->getUserCart($userId);
         }
-        return $this->mapper->mapToCartDTOArray($cart);
+        return $this->mapper->mapToCartDTO($cart);
     }
 
-    public function addToCart(AddToCartRequest $request): ResponseDTO
+    public function updateCart(CartRequest $request): ResponseDTO
     {
-        $validationError = $this->validateAddToCartRequest($request);
+        $validationError = $this->validateCartRequest($request);
         if ($validationError) {
             return $validationError;
         }
 
-        $user = SecureSession::get('user');
-        $userId = $user['id'] ?? null;
-        $sessionCart = $user['cart'] ?? [
-            'id' => 0,
-            'items' => [],
-            'totalAmount' => 0,
-            'totalQuantity' => 0
-        ];
-
         $productId = $request->getProductId();
-        $quantity = $request->getProductQuantity();
+        $delta = $request->getOperation() === 'remove'
+            ? -$request->getProductQuantity()
+            : $request->getProductQuantity();
 
-        $newQuantity = 0;
-        foreach ($sessionCart['items'] as $item) {
-            if ($item['productId'] === $productId) {
-                $newQuantity = $item['quantity'] + $quantity;
-                break;
+        if ($delta > 0) { // its adding to the cart
+            if (!$this->validateAndCheckStock($productId, $delta)) {
+                return new ResponseDTO(
+                    "error",
+                    "Product out of stock",
+                    [],
+                    [],
+                    400
+                );
             }
         }
 
-        // check stock
-        if (!$this->productRepository->productStockAvailable($productId, $newQuantity)) {
-            return new ResponseDTO(
-                "error",
-                "Product out of stock",
-                [],
-                [],
-                400
-            );
-        }
+        $product = $this->productService->getProductProjectionById($productId);
+        $sessionCart = $this->updateCartItem($product, $delta);
+        SecureSession::set('cart', $sessionCart);
 
-        $sessionCart = $this->addToCartItem($sessionCart, $productId, $quantity);
-        SecureSession::set('user', ['cart' => $sessionCart]);
-        if (!$userId) {
-            return new ResponseDTO(
-                "success",
-                "Product added to cart",
-                [],
-                [],
-                200
-            );
-        }
-        // if productId exist then cartItemId exist as well
-
-        // if cartItemId does not exist then create a new entry
         return new ResponseDTO(
             "success",
             "Product added to cart",
@@ -134,17 +136,26 @@ class CartServiceImpl implements CartService
     private function getGuestCart(array $sessionCart): array
     {
         // grab product ids
-        $productIds = array_keys($sessionCart);
+        $productIdAndQuantity = []; // [productId => quantity]
+        foreach ($sessionCart['items'] as $item) {
+            $productIdAndQuantity[$item['productId']] = $item['quantity'];
+        }
         // fetch data using product ids
-        $products = $this->productRepository->getProductByIds($productIds);
+        $products = $this->productService->getProductProjectionByIds(array_keys($productIdAndQuantity));
+        $cartItems = $this->cartItemService->createGuestCartItems($products, $productIdAndQuantity);
 
-        $cart = [];
-        $index = 1;
-        foreach ($products as $product) {
-            $productId = $product['id'];
-            $cart[] = [
-                'id' => $index++, // since guest user don't have data in the cart table
-                'quantity' => $sessionCart[$productId],
+        $totalCost = 0;
+        $totalQuantity = 0;
+        foreach ($cartItems as $item) {
+            $totalCost += $item->getQuantity() * $item->getProduct()->getPrice();
+        }
+        foreach ($products as $idx => $product) {
+            $productId = $product->id;
+            $cart['totalCost'] += $product->price * $productIdAndQuantity[$productId];
+            $cart['totalQuantity'] += $productIdAndQuantity[$productId];
+            $cart['items'][] = [
+                'id' => $idx, // since guest user don't have data in the cart_item table
+                'quantity' => $productIdAndQuantity[$productId],
                 'product' => $product
             ];
         }
@@ -153,28 +164,64 @@ class CartServiceImpl implements CartService
 
     private function getUserCart(int $userId): array
     {
-        $cartRows = $this->cartRepository->getCartByUserId($userId);
-        $productIds = array_column($cartRows, 'product_id');
-        $products = $this->productRepository->getProductByIds($productIds);
-        $cart = [];
-        $productMap = [];
-
-        foreach ($products as $product) {
-            $productMap[$product['id']] = $product;
-        }
-
-        foreach ($cartRows as $row) {
-            $productId = $row['productId'];
-            $cart[] = [
-                'id' => $row['id'],
-                'quantity' => $row['quantity'],
-                'product' => $productMap[$productId]
-            ];
-        }
+        $cartDb = $this->cartRepository->getCartByUserId($userId)[0];
+        $cartItems = $this->cartItemService->getCartItemsByCartId($cartDb['id']);
+        $cart = [
+            'id' => $cartDb['id'],
+            'totalCost' => $cartDb['total_amount'],
+            'totalQuantity' => $cartDb['total_quantity'],
+            'items' => $cartItems
+        ];
         return $cart;
     }
 
-    private function validateAddToCartRequest(AddToCartRequest $request): ?ResponseDTO
+    private function updateCartItem(array $product, int $delta): array
+    {
+        $userId = SecureSession::get('userId');
+        $sessionCart = SecureSession::get('cart') ?? [
+            'id' => 0,
+            'items' => [],
+            'totalCost' => 0,
+            'totalQuantity' => 0
+        ];
+        $productId = $product['id'];
+        $cartId = $sessionCart['id'];
+
+        // apply to an existing item or leave as is
+        $updatedCart = $this->cartItemService->applyDelta($sessionCart, $product, $delta);
+
+        if (!$this->cartItemService->cartHasProduct($updatedCart, $productId) && $delta > 0) {
+            $updatedCart = $this->cartItemService->insertItem($updatedCart, $product, $delta);
+        }
+
+        if ($userId) {
+            $this->cartRepository->save([
+                'id' => $cartId,
+                'total_quantity' => $updatedCart['totalQuantity'],
+                'total_amount' => $updatedCart['totalCost']
+            ]);
+        }
+
+        return $updatedCart;
+    }
+
+    private function validateAndCheckStock(int $productId, int $qtyToAdd): bool
+    {
+        $sessionCart = SecureSession::get('cart') ?? ['items' => []];
+        $currentQty = 0;
+
+        foreach ($sessionCart['items'] as $item) {
+            if ($item['productId'] === $productId) {
+                $currentQty = $item['quantity'];
+                break;
+            }
+        }
+
+        $newQty = $currentQty + $qtyToAdd;
+        return $this->productService->isStockAvailable($productId, $newQty);
+    }
+
+    private function validateCartRequest(CartRequest $request): ?ResponseDTO
     {
         if ($request->fails()) {
             return new ResponseDTO(
@@ -186,27 +233,5 @@ class CartServiceImpl implements CartService
             );
         }
         return null;
-    }
-
-    private function addToCartItem(array $cart, int $productId, int $qtyToAdd): array
-    {
-        $found = false;
-        foreach ($cart['items'] as &$item) {
-            if ($item['productId'] === $productId) {
-                $item['quantity'] += $qtyToAdd;
-                $found = true;
-                break;
-            }
-        }
-
-        if (!$found) {
-            $cart['items'][] = [
-                'productId' => $productId,
-                'quantity' => $qtyToAdd,
-            ];
-        }
-        $cart['totalQuantity'] += $qtyToAdd;
-
-        return $cart;
     }
 }

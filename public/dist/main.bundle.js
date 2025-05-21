@@ -282,23 +282,41 @@ var Cart = {
   },
   submit: function () {
     var _submit = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(form) {
-      var formData, response;
+      var $button, $spinner, $text, formData, response;
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
             _utils_index_js__WEBPACK_IMPORTED_MODULE_1__.Util.removeErrorMessages();
-            try {
-              formData = this.getAddProductFormData(form);
-              response = _api_http_js__WEBPACK_IMPORTED_MODULE_2__.Http.post("/api/v1/cart/add", formData);
-              _utils_index_js__WEBPACK_IMPORTED_MODULE_1__.Util.displaySuccessMessage("Product added to cart", response.message);
-            } catch (error) {
-              console.error("Add Product Error: ", error);
-            }
-          case 2:
+            $button = jquery__WEBPACK_IMPORTED_MODULE_0__("#add-to-cart-btn");
+            $spinner = $button.find(".spinner-border");
+            $text = $button.find(".button-text");
+            $button.prop("disabled", true);
+            $spinner.removeClass("d-none");
+            $text.text("Adding...");
+            _context.prev = 7;
+            formData = this.getAddProductFormData(form);
+            _context.next = 11;
+            return _api_http_js__WEBPACK_IMPORTED_MODULE_2__.Http.post("/api/v1/cart/add", formData);
+          case 11:
+            response = _context.sent;
+            _utils_index_js__WEBPACK_IMPORTED_MODULE_1__.Util.showToast(response.message);
+            _context.next = 18;
+            break;
+          case 15:
+            _context.prev = 15;
+            _context.t0 = _context["catch"](7);
+            console.error("Add Product Error: ", _context.t0);
+          case 18:
+            _context.prev = 18;
+            $button.prop("disabled", false);
+            $spinner.addClass("d-none");
+            $text.text("Add to Cart");
+            return _context.finish(18);
+          case 23:
           case "end":
             return _context.stop();
         }
-      }, _callee, this);
+      }, _callee, this, [[7, 15, 18, 23]]);
     }));
     function submit(_x) {
       return _submit.apply(this, arguments);
@@ -308,7 +326,8 @@ var Cart = {
   getAddProductFormData: function getAddProductFormData(form) {
     return {
       productId: form["productId"].value,
-      productQuantity: form["productQuantity"].value
+      productQuantity: form["productQuantity"].value,
+      operation: "add"
     };
   },
   /**
@@ -319,6 +338,11 @@ var Cart = {
     jquery__WEBPACK_IMPORTED_MODULE_0__("#cart-count").text(cartCount);
   }
 };
+function sleep(ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms);
+  });
+}
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Cart);
 
 /***/ }),
@@ -962,15 +986,15 @@ var Util = {
    */
   displaySuccessMessage: function displaySuccessMessage(title, message) {
     var redirectUrl = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var modal = jquery__WEBPACK_IMPORTED_MODULE_0__("#exampleModal");
-    if (!modal.length) {
+    var $modal = jquery__WEBPACK_IMPORTED_MODULE_0__("#exampleModal");
+    if (!$modal.length) {
       console.error("Modal with ID 'exampleModal' not found.");
       return;
     }
     jquery__WEBPACK_IMPORTED_MODULE_0__("#exampleModalLabel").text(title);
     jquery__WEBPACK_IMPORTED_MODULE_0__(".modal-body").html("<p>".concat(message, "</p>"));
     jquery__WEBPACK_IMPORTED_MODULE_0__(".modal-footer .btn-secondary").text("Close").off("click").on("click", function () {
-      modal.modal("hide");
+      $modal.hide();
     });
     var $primaryButton = jquery__WEBPACK_IMPORTED_MODULE_0__(".modal-footer .btn-primary").hide();
     if (redirectUrl) {
@@ -978,7 +1002,7 @@ var Util = {
         window.location.href = redirectUrl;
       }).show();
     }
-    modal.modal("show");
+    $modal.show();
   },
   /**
    * Display an error toast.
@@ -1050,9 +1074,26 @@ var Util = {
   showToast: function showToast(message) {
     var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "success";
     var $toast = jquery__WEBPACK_IMPORTED_MODULE_0__("#app-toast");
+    var $strong = $toast.find(".me-auto");
     var $body = jquery__WEBPACK_IMPORTED_MODULE_0__("#app-toast-body");
+
+    // clear any previous icon and insert a new one
+    $strong.empty();
+    var $icon = jquery__WEBPACK_IMPORTED_MODULE_0__("<i>").addClass("fa-solid me-2");
+    switch (type) {
+      case "success":
+        $icon.addClass("fa-check");
+        $strong.text("Success");
+        break;
+      case "info":
+      default:
+        $icon.addClass("fa-info-circle");
+        $strong.text("Notice");
+        break;
+    }
+    $strong.prepend($icon);
     $body.text(message);
-    $toast.removeClass().addClass("toast align-items-center text-bg-".concat(type, " border-0"));
+    $toast.removeClass().addClass("toast align-items-center bg-".concat(type, "-subtle text-").concat(type, " border-0"));
     var toast = bootstrap.Toast.getOrCreateInstance($toast[0]);
     toast.show();
   }

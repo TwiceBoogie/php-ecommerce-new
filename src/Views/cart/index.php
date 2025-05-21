@@ -7,9 +7,9 @@
 use function Sebastian\PhpEcommerce\Helpers\include_partial;
 
 $cart = $viewModel->getCart();
+$cartItems = $cart->getItems();
 
 include_partial('header.php', ['viewModel' => $viewModel]);
-$cart = $viewModel->getCart();
 ?>
 <div id="main-wrapper" class="container mt-5">
     <div class="table-responsive">
@@ -24,7 +24,7 @@ $cart = $viewModel->getCart();
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($cart as $item):
+                <?php foreach ($cartItems as $item):
                     $product = $item->getProduct();
                     ?>
                     <tr class="item-row">
@@ -58,7 +58,7 @@ $cart = $viewModel->getCart();
                 <tr class="table-light fw-bold">
                     <td>Total: </td>
                     <td id="cart-total-amount">
-                        $100
+                        $<?= $cart->getTotalCost(); ?>
                     </td>
                     <td colspan="2">
                         <button type="button" class="btn btn-primary">

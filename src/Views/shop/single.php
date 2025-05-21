@@ -54,8 +54,10 @@ $product = $viewModel->getProduct();
                 <form id="add-product-form">
                     <input type="hidden" name="productId" value=<?= $product->getId(); ?> />
                     <input type="number" name="productQuantity" min="1" max=<?= $product->getQuantity(); ?> value="1" />
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        Add to Cart
+                    <button type="submit" class="btn btn-primary btn-lg" id="add-to-cart-btn">
+                        <span class="button-text">Add to Cart</span>
+                        <span class="spinner-border spinner-border-sm ml-2 d-none" role="status"
+                            aria-hidden="true"></span>
                     </button>
                 </form>
             </div>

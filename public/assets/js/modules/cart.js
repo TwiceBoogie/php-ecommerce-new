@@ -44,13 +44,23 @@ const Cart = {
 
   submit: async function (form) {
     Util.removeErrorMessages();
+    const $button = $("#add-to-cart-btn");
+    const $spinner = $button.find(".spinner-border");
+    const $text = $button.find(".button-text");
+    $button.prop("disabled", true);
+    $spinner.removeClass("d-none");
+    $text.text("Adding...");
     try {
       const formData = this.getAddProductFormData(form);
+      const response = await Http.post("/api/v1/cart/add", formData);
 
-      const response = Http.post("/api/v1/cart/add", formData);
-      Util.displaySuccessMessage("Product added to cart", response.message);
+      Util.showToast(response.message);
     } catch (error) {
       console.error("Add Product Error: ", error);
+    } finally {
+      $button.prop("disabled", false);
+      $spinner.addClass("d-none");
+      $text.text("Add to Cart");
     }
   },
 
@@ -58,6 +68,7 @@ const Cart = {
     return {
       productId: form["productId"].value,
       productQuantity: form["productQuantity"].value,
+      operation: "add",
     };
   },
 
@@ -69,5 +80,9 @@ const Cart = {
     $("#cart-count").text(cartCount);
   },
 };
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export default Cart;

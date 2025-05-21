@@ -6,12 +6,9 @@ use Sebastian\PhpEcommerce\DTO\CartDTO;
 
 class CartViewModel extends BaseViewModel
 {
-    /**
-     * @var CartDTO[]
-     */
-    private array $cartDTO;
+    private CartDTO $cartDTO;
 
-    public function __construct(bool $isAdmin, bool $isAuthenticated, array $cartDTO)
+    public function __construct(bool $isAdmin, bool $isAuthenticated, CartDTO $cartDTO)
     {
         parent::__construct($isAdmin, $isAuthenticated);
         $this->cartDTO = $cartDTO;
@@ -20,7 +17,7 @@ class CartViewModel extends BaseViewModel
     /**
      * @return CartDTO[]
      */
-    public function getCart(): array
+    public function getCart(): CartDTO
     {
         return $this->cartDTO;
     }

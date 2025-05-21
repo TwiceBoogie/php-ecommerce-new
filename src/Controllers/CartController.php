@@ -3,7 +3,7 @@
 namespace Sebastian\PhpEcommerce\Controllers;
 
 use Sebastian\PhpEcommerce\Http\Request;
-use Sebastian\PhpEcommerce\Http\Request\AddToCartRequest;
+use Sebastian\PhpEcommerce\Http\Request\CartRequest;
 use Sebastian\PhpEcommerce\Services\CartService;
 use Sebastian\PhpEcommerce\Services\Response;
 use Sebastian\PhpEcommerce\Views\Models\CartViewModel;
@@ -20,7 +20,6 @@ class CartController
 
     public function index(Request $request)
     {
-        $cart = $this->cartService->getCart();
         $isAdmin = $request->isAdmin();
         $isAuthenticated = $request->isAuthenticated();
         $cart = $this->cartService->getCart();
@@ -32,16 +31,14 @@ class CartController
 
     public function add(Request $request)
     {
-        $addToCartRequest = new AddToCartRequest($request->getBody());
-        $response = $this->cartService->addToCart($addToCartRequest);
-        return Response::send([
-            'message' => 'Product added to cart',
-        ], 200);
+        $addToCartRequest = new CartRequest($request->getBody());
+        $response = $this->cartService->updateCart($addToCartRequest);
+        return Response::send($response->toArray(), 200);
     }
 
     public function clear(Request $request)
     {
-        unset($_SESSION['cart']);
+
         return Response::send(['message' => 'Cart cleared'], 200);
     }
 }
