@@ -4,6 +4,7 @@ namespace Sebastian\PhpEcommerce\Repository;
 
 use Sebastian\PhpEcommerce\Models\Database;
 use Exception;
+use Sebastian\PhpEcommerce\Repository\Projections\ProductProjection;
 
 /**
  * Class ProductRepository
@@ -79,23 +80,25 @@ class ProductRepository extends BaseRepository
      * Retrieves a product by its ID along with detailed information and images.
      *
      * @param int $productId The product ID.
-     * @return array         The product details with images.
+     * @return ?ProductProjection         The product details with images.
      * @throws Exception     If the product is not found.
      */
-    public function getProductById(int $productId): array
+    public function getProductById(int $productId): ?ProductProjection
     {
         $products = $this->getProductByIds([$productId]);
-        return $products[0] ?? [];
+        return $products[0] ?? null;
     }
 
     public function getProductByIds(array $productIds): array
     {
         $placeholders = [];
         $bindings = [];
+
         foreach ($productIds as $id) {
             $placeholders[] = ":product_$id";
             $bindings["product_$id"] = $id;
         }
+
         $sql = "SELECT
                     p.id,
                     p.name,
@@ -123,7 +126,16 @@ class ProductRepository extends BaseRepository
         foreach ($result as &$row) {
             $row['images'] = json_decode($row['images'], true) ?? [];
         }
-        return $result;
+        return array_map(function (array $row) {
+            return new ProductProjection(
+                (int) $row['id'],
+                $row['name'],
+                $row['category'],
+                (float) $row['price'],
+                $row['main_image'],
+                json_decode($row['images'], true) ?? []
+            );
+        }, $result);
     }
 
     /**

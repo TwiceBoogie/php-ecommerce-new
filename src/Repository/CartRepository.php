@@ -25,6 +25,7 @@ class CartRepository extends BaseRepository
         ]);
     }
 
+
     public function updateCartItemQuantity(string $identifier, string $column, int $productId, int $quantity)
     {
         $this->db->update(
