@@ -5,14 +5,19 @@ namespace Sebastian\PhpEcommerce\DTO;
 class CartDTO
 {
     private int $id;
-    private ProductDTO $product;
-    private int $quantity;
+    /**
+     * @var CartItemDTO[]
+     */
+    private array $items;
+    private int $totalQuantity;
+    private int $totalCost;
 
-    public function __construct(int $id, ProductDTO $product, int $quantity)
+    public function __construct(int $id, array $items, int $totalCost, int $totalQuantity)
     {
         $this->id = $id;
-        $this->product = $product;
-        $this->quantity = $quantity;
+        $this->items = $items;
+        $this->totalCost = $totalCost;
+        $this->totalQuantity = $totalQuantity;
     }
 
     public function getId(): int
@@ -20,13 +25,21 @@ class CartDTO
         return $this->id;
     }
 
-    public function getProduct(): ProductDTO
+    /**
+     * @return CartItemDTO[]
+     */
+    public function getItems(): array
     {
-        return $this->product;
+        return $this->items;
     }
 
-    public function getQuantity(): int
+    public function getTotalQuantity(): int
     {
-        return $this->quantity;
+        return $this->totalQuantity;
+    }
+
+    public function getTotalCost(): int
+    {
+        return $this->totalCost;
     }
 }

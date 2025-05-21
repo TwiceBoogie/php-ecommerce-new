@@ -18,7 +18,7 @@ class ProductDTO
         string $name,
         string $category,
         float $price,
-        string $main_image,
+        string $main_image = "",
         ?array $images = [],
         ?string $description = null,
         ?int $stock_quantity = null
